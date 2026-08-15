@@ -3,8 +3,13 @@ import { FileSearch, FileText, Play, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
+import { ProgressBar } from "../components/ui/ProgressBar";
 import { StatusBadge, type StatusTone } from "../components/ui/StatusBadge";
-import { useAttackStore, type AttackStatus } from "../store/useAttackStore";
+import {
+  useAttackStore,
+  type AttackStage,
+  type AttackStatus,
+} from "../store/useAttackStore";
 import {
   cancelAttack,
   pickInputFile,
@@ -20,6 +25,16 @@ const STATUS_TONE: Record<AttackStatus, StatusTone> = {
   cancelled: "warning",
   error: "danger",
 };
+
+function operationKey(status: AttackStatus, stage: AttackStage): string {
+  if (status === "loading") return "screens.attack.stage.loading";
+  if (status === "running") {
+    return stage === "hardnested"
+      ? "screens.attack.stage.hardnested"
+      : "screens.attack.stage.running";
+  }
+  return `screens.attack.status.${status}`;
+}
 
 function basename(path: string): string {
   const parts = path.split(/[\\/]/);
@@ -54,6 +69,8 @@ function useElapsed(
 export function AttackScreen() {
   const { t } = useTranslation();
   const status = useAttackStore((s) => s.status);
+  const stage = useAttackStore((s) => s.stage);
+  const progress = useAttackStore((s) => s.progress);
   const inputPath = useAttackStore((s) => s.inputPath);
   const cancelRequested = useAttackStore((s) => s.cancelRequested);
   const startedAt = useAttackStore((s) => s.startedAt);
@@ -68,6 +85,11 @@ export function AttackScreen() {
 
   const isActive = status === "loading" || status === "running";
   const elapsed = useElapsed(startedAt, finishedAt, isActive);
+
+  const indeterminate =
+    status === "loading" ||
+    (status === "running" && (progress === null || progress.total === 0));
+  const displayPercent = status === "success" ? 100 : (progress?.percent ?? 0);
 
   const handlePick = useCallback(async () => {
     try {
@@ -167,6 +189,26 @@ export function AttackScreen() {
           </div>
         </div>
       </Panel>
+
+      {status !== "idle" && (
+        <Panel title={t("screens.attack.progressTitle")}>
+          <div className="flex flex-col gap-3">
+            <ProgressBar
+              label={t(operationKey(status, stage))}
+              value={displayPercent}
+              indeterminate={indeterminate}
+            />
+            {progress && progress.total > 0 && (
+              <div className="flex items-center justify-between text-xs text-muted">
+                <span>{t("screens.attack.noncesLabel")}</span>
+                <span className="font-mono">
+                  {progress.processed} / {progress.total}
+                </span>
+              </div>
+            )}
+          </div>
+        </Panel>
+      )}
     </div>
   );
 }

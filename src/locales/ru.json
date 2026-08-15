@@ -16,6 +16,13 @@
       "start": "Запустить атаку",
       "cancel": "Отменить",
       "cancelling": "Отмена…",
+      "progressTitle": "Прогресс",
+      "noncesLabel": "Обработано nonce",
+      "stage": {
+        "loading": "Загрузка лога",
+        "running": "Восстановление ключей",
+        "hardnested": "Атака HardNested"
+      },
       "status": {
         "idle": "Ожидание",
         "loading": "Загрузка",

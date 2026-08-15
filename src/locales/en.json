@@ -16,6 +16,13 @@
       "start": "Start attack",
       "cancel": "Cancel",
       "cancelling": "Cancelling…",
+      "progressTitle": "Progress",
+      "noncesLabel": "Nonces processed",
+      "stage": {
+        "loading": "Loading log",
+        "running": "Recovering keys",
+        "hardnested": "HardNested attack"
+      },
       "status": {
         "idle": "Idle",
         "loading": "Loading",
