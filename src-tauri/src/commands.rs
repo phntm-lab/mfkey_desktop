@@ -145,19 +145,39 @@ pub fn cancel_attack(state: State<AttackControl>) -> Result<(), CommandError> {
     Ok(())
 }
 
+const DICT_DIR_PREFIX: &str = "attack-";
+
 fn prepare_dict_dir(app: &AppHandle) -> Result<PathBuf, CommandError> {
     let base = app
         .path()
         .app_cache_dir()
         .map_err(|e| CommandError::io(&format!("Failed to resolve cache directory: {e}")))?;
+    clean_stale_dict_dirs(&base);
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_millis())
         .unwrap_or(0);
-    let dir = base.join(format!("attack-{ts}"));
+    let dir = base.join(format!("{DICT_DIR_PREFIX}{ts}"));
     std::fs::create_dir_all(&dir)
         .map_err(|e| CommandError::io(&format!("Failed to create output directory: {e}")))?;
     Ok(dir)
+}
+
+fn clean_stale_dict_dirs(base: &Path) {
+    let Ok(entries) = std::fs::read_dir(base) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let is_dict_dir = path.is_dir()
+            && path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.starts_with(DICT_DIR_PREFIX));
+        if is_dict_dir {
+            let _ = std::fs::remove_dir_all(&path);
+        }
+    }
 }
 
 fn emit_error(app: &AppHandle, code: &str, message: &str) {
