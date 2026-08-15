@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { applyTheme } from "../theme";
 import { useApplicationStore } from "../../store/useApplicationStore";
 import { useDisclaimerStore } from "../../store/useDisclaimerStore";
@@ -14,6 +15,7 @@ async function hydrateStores(): Promise<void> {
   });
   useDisclaimerStore.getState().hydrate(settings.disclaimerAccepted);
   applyTheme(settings.theme);
+  void i18n.changeLanguage(settings.language);
 }
 
 function subscribePersistence(): void {
@@ -40,6 +42,14 @@ function subscribeThemeSync(): void {
   });
 }
 
+function subscribeLanguageSync(): void {
+  useSettingsStore.subscribe((state, prev) => {
+    if (state.language !== prev.language) {
+      void i18n.changeLanguage(state.language);
+    }
+  });
+}
+
 export async function bootstrapPersistence(): Promise<void> {
   if (bootstrapped) {
     return;
@@ -48,5 +58,6 @@ export async function bootstrapPersistence(): Promise<void> {
   await hydrateStores();
   subscribePersistence();
   subscribeThemeSync();
+  subscribeLanguageSync();
   useApplicationStore.getState().setReady(true);
 }

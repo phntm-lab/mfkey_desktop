@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "ariaLabel": "Основная навигация",
+    "attack": "Атака",
+    "device": "Устройство",
+    "settings": "Настройки",
+    "about": "О программе"
+  },
+  "screens": {
+    "attack": {
+      "title": "Атака",
+      "panelTitle": "Офлайн-атака",
+      "description": "Выберите лог nonce с Flipper для восстановления ключей MIFARE Classic.",
+      "selectFile": "Выбрать файл лога"
+    },
+    "device": {
+      "title": "Устройство",
+      "panelTitle": "Подключение Flipper",
+      "statusDisconnected": "Отключено",
+      "description": "Подключите Flipper Zero по USB или Bluetooth LE для live-атак.",
+      "scan": "Поиск устройств"
+    },
+    "settings": {
+      "title": "Настройки",
+      "languageTitle": "Язык",
+      "languagePlaceholder": "Здесь появится выбор языка.",
+      "appearanceTitle": "Оформление",
+      "appearancePlaceholder": "Здесь появится выбор темы."
+    },
+    "about": {
+      "title": "О программе",
+      "appTitle": "MFKey Desktop",
+      "appDescription": "Кроссплатформенное desktop-приложение для восстановления ключей MIFARE Classic из логов nonce Flipper Zero.",
+      "disclaimerTitle": "Дисклеймер",
+      "disclaimerDescription": "Для исследований безопасности и тестирования на картах, которыми вы владеете или которые уполномочены анализировать. Здесь появится окно дисклеймера."
+    }
+  }
+}

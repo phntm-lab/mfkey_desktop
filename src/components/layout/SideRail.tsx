@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../store/useUiStore";
 import { SCREENS, type ScreenGroup, type ScreenMeta } from "../../config/screens";
 
@@ -6,12 +7,13 @@ function itemsFor(group: ScreenGroup): ScreenMeta[] {
 }
 
 export function SideRail() {
+  const { t } = useTranslation();
   const activeScreen = useUiStore((s) => s.activeScreen);
   const setActiveScreen = useUiStore((s) => s.setActiveScreen);
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t("nav.ariaLabel")}
       className="flex w-14 shrink-0 flex-col items-center justify-between border-r border-line bg-surface py-3"
     >
       <div className="flex flex-col items-center gap-1">
@@ -47,7 +49,9 @@ function RailButton({
   active: boolean;
   onSelect: () => void;
 }) {
-  const { Icon, label } = item;
+  const { t } = useTranslation();
+  const { Icon } = item;
+  const label = t(`nav.${item.id}`);
   const state = active
     ? "text-accent bg-accent-soft"
     : "text-muted hover:text-fg hover:bg-raised";

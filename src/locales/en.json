@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "ariaLabel": "Primary",
+    "attack": "Attack",
+    "device": "Device",
+    "settings": "Settings",
+    "about": "About"
+  },
+  "screens": {
+    "attack": {
+      "title": "Attack",
+      "panelTitle": "Offline attack",
+      "description": "Select a Flipper nonce log to recover MIFARE Classic keys.",
+      "selectFile": "Select log file"
+    },
+    "device": {
+      "title": "Device",
+      "panelTitle": "Flipper connection",
+      "statusDisconnected": "Disconnected",
+      "description": "Connect a Flipper Zero over USB or Bluetooth LE to run live attacks.",
+      "scan": "Scan for devices"
+    },
+    "settings": {
+      "title": "Settings",
+      "languageTitle": "Language",
+      "languagePlaceholder": "Language selection will appear here.",
+      "appearanceTitle": "Appearance",
+      "appearancePlaceholder": "Theme selection will appear here."
+    },
+    "about": {
+      "title": "About",
+      "appTitle": "MFKey Desktop",
+      "appDescription": "A cross-platform desktop tool for recovering MIFARE Classic keys from Flipper Zero nonce logs.",
+      "disclaimerTitle": "Disclaimer",
+      "disclaimerDescription": "For security research and testing on cards you own or are authorized to analyze. The disclaimer flow will appear here."
+    }
+  }
+}

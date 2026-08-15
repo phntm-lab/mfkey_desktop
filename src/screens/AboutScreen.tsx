@@ -1,22 +1,19 @@
 import { ShieldAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Panel } from "../components/ui/Panel";
 
 export function AboutScreen() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-6 p-6">
-      <Panel title="MFKey Desktop">
-        <p className="text-sm text-muted">
-          A cross-platform desktop tool for recovering MIFARE Classic keys from
-          Flipper Zero nonce logs.
-        </p>
+      <Panel title={t("screens.about.appTitle")}>
+        <p className="text-sm text-muted">{t("screens.about.appDescription")}</p>
       </Panel>
-      <Panel title="Disclaimer">
+      <Panel title={t("screens.about.disclaimerTitle")}>
         <div className="flex items-start gap-3 text-muted">
           <ShieldAlert size={20} strokeWidth={1.75} className="mt-0.5 shrink-0" />
-          <p className="text-sm">
-            For security research and testing on cards you own or are authorized
-            to analyze. The disclaimer flow will appear here.
-          </p>
+          <p className="text-sm">{t("screens.about.disclaimerDescription")}</p>
         </div>
       </Panel>
     </div>
