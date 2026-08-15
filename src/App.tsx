@@ -1,13 +1,13 @@
 import "./App.css";
+import { AppShell } from "./components/layout/AppShell";
 
 function App() {
   return (
-    <main className="flex h-screen w-screen flex-col items-center justify-center gap-2 bg-base">
-      <span className="font-mono text-lg font-semibold tracking-wide text-accent">
-        MFKey Desktop
-      </span>
-      <span className="text-sm text-muted">MIFARE Classic key recovery</span>
-    </main>
+    <AppShell active="attack" title="Attack">
+      <div className="p-6">
+        <p className="text-sm text-muted">Application shell placeholder.</p>
+      </div>
+    </AppShell>
   );
 }
 
