@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -50,6 +50,13 @@ pub struct FileAttackRequest {
 pub struct AutoRequest {
     pub transport: TransportKind,
     pub device_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveKeysRequest {
+    pub keys: Vec<String>,
+    pub dict_paths: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -159,6 +166,41 @@ fn emit_error(app: &AppHandle, code: &str, message: &str) {
         message: message.to_string(),
     };
     let _ = app.emit(ATTACK_ERROR, payload);
+}
+
+#[tauri::command]
+pub fn save_recovered_keys(
+    app: AppHandle,
+    request: SaveKeysRequest,
+) -> Result<Option<String>, CommandError> {
+    let destination = match app.dialog().file().blocking_pick_folder() {
+        Some(folder) => match folder.into_path() {
+            Ok(path) => path,
+            Err(e) => return Err(CommandError::io(&format!("Invalid destination: {e}"))),
+        },
+        None => return Ok(None),
+    };
+
+    if !request.keys.is_empty() {
+        let mut content = String::new();
+        for key in &request.keys {
+            content.push_str(key);
+            content.push('\n');
+        }
+        std::fs::write(destination.join("recovered_keys.txt"), content)
+            .map_err(|e| CommandError::io(&format!("Failed to write keys file: {e}")))?;
+    }
+
+    for dict_path in &request.dict_paths {
+        let source = Path::new(dict_path);
+        if let Some(name) = source.file_name() {
+            std::fs::copy(source, destination.join(name)).map_err(|e| {
+                CommandError::io(&format!("Failed to copy dictionary {dict_path}: {e}"))
+            })?;
+        }
+    }
+
+    Ok(Some(destination.to_string_lossy().into_owned()))
 }
 
 #[tauri::command]

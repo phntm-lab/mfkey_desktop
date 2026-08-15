@@ -14,6 +14,7 @@ pub fn run() {
             commands::start_file_attack,
             commands::cancel_attack,
             commands::pick_input_file,
+            commands::save_recovered_keys,
             commands::list_flipper_usb,
             commands::scan_ble,
             commands::start_auto,
