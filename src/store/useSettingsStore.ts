@@ -12,6 +12,7 @@ interface SettingsState {
   theme: Theme;
   setLanguage: (language: Language) => void;
   setTheme: (theme: Theme) => void;
+  hydrate: (settings: { language: Language; theme: Theme }) => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
@@ -19,4 +20,5 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   theme: DEFAULT_THEME,
   setLanguage: (language) => set({ language }),
   setTheme: (theme) => set({ theme }),
+  hydrate: ({ language, theme }) => set({ language, theme }),
 }));
