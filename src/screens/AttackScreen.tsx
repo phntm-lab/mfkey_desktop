@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
   Download,
   FileSearch,
   FileText,
@@ -87,6 +89,7 @@ export function AttackScreen() {
   const foundKeys = useAttackStore((s) => s.foundKeys);
   const dictOutputs = useAttackStore((s) => s.dictOutputs);
   const candidateKeys = useAttackStore((s) => s.candidateKeys);
+  const hardnestedLines = useAttackStore((s) => s.hardnestedLines);
   const error = useAttackStore((s) => s.error);
   const inputPath = useAttackStore((s) => s.inputPath);
   const cancelRequested = useAttackStore((s) => s.cancelRequested);
@@ -101,6 +104,7 @@ export function AttackScreen() {
   const reset = useAttackStore((s) => s.reset);
 
   const [exportInfo, setExportInfo] = useState<ExportInfo | null>(null);
+  const [hardnestedOpen, setHardnestedOpen] = useState(false);
 
   const isActive = status === "loading" || status === "running";
   const elapsed = useElapsed(startedAt, finishedAt, isActive);
@@ -350,6 +354,37 @@ export function AttackScreen() {
               </p>
             )}
           </div>
+        </Panel>
+      )}
+
+      {hardnestedLines.length > 0 && (
+        <Panel
+          title={t("screens.attack.hardnestedTitle")}
+          actions={
+            <button
+              type="button"
+              onClick={() => setHardnestedOpen((open) => !open)}
+              aria-expanded={hardnestedOpen}
+              className="inline-flex items-center gap-1.5 rounded text-xs text-muted transition-colors hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              {hardnestedOpen ? (
+                <ChevronDown size={14} strokeWidth={1.75} />
+              ) : (
+                <ChevronRight size={14} strokeWidth={1.75} />
+              )}
+              {t("screens.attack.linesCount", { count: hardnestedLines.length })}
+            </button>
+          }
+        >
+          {hardnestedOpen ? (
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md border border-line bg-raised p-3 font-mono text-xs leading-relaxed text-muted">
+              {hardnestedLines.join("\n")}
+            </pre>
+          ) : (
+            <p className="text-xs text-muted">
+              {t("screens.attack.hardnestedHint")}
+            </p>
+          )}
         </Panel>
       )}
     </div>

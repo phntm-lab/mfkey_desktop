@@ -28,6 +28,9 @@
       "dictionariesLabel": "Словари",
       "keyType": "Ключ {{type}}",
       "keysCount": "{{count}} ключей",
+      "hardnestedTitle": "Лог HardNested",
+      "hardnestedHint": "Подробный вывод HardNested. Разверните для просмотра.",
+      "linesCount": "{{count}} строк",
       "stage": {
         "loading": "Загрузка лога",
         "running": "Восстановление ключей",

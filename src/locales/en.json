@@ -28,6 +28,9 @@
       "dictionariesLabel": "Dictionaries",
       "keyType": "Key {{type}}",
       "keysCount": "{{count}} keys",
+      "hardnestedTitle": "HardNested log",
+      "hardnestedHint": "Detailed HardNested output. Expand to view.",
+      "linesCount": "{{count}} lines",
       "stage": {
         "loading": "Loading log",
         "running": "Recovering keys",
