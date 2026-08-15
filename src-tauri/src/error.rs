@@ -14,4 +14,18 @@ impl CommandError {
             message: format!("Command '{command}' is not implemented yet"),
         }
     }
+
+    pub fn already_running() -> Self {
+        Self {
+            code: "already_running".to_string(),
+            message: "An attack is already running".to_string(),
+        }
+    }
+
+    pub fn io(message: &str) -> Self {
+        Self {
+            code: "io".to_string(),
+            message: message.to_string(),
+        }
+    }
 }

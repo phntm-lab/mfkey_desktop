@@ -41,7 +41,9 @@ pub struct DictOutputPayload {
 #[serde(rename_all = "camelCase")]
 pub struct AttackSummaryPayload {
     pub found_keys: u64,
+    pub candidate_keys: u64,
     pub dict_outputs: Vec<DictOutputPayload>,
+    pub status: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
