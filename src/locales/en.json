@@ -36,9 +36,12 @@
     "about": {
       "title": "About",
       "appTitle": "MFKey Desktop",
-      "appDescription": "A cross-platform desktop tool for recovering MIFARE Classic keys from Flipper Zero nonce logs.",
-      "disclaimerTitle": "Disclaimer",
-      "disclaimerDescription": "For security research and testing on cards you own or are authorized to analyze. The disclaimer flow will appear here."
+      "appDescription": "A cross-platform desktop tool for recovering MIFARE Classic keys from Flipper Zero nonce logs."
     }
+  },
+  "disclaimer": {
+    "title": "Disclaimer",
+    "body": "This tool is intended exclusively for security research, education, and testing on cards you own or have explicit permission to analyze. The author is not responsible for any misuse. Use at your own risk and in accordance with the laws of your jurisdiction.",
+    "accept": "I accept"
   }
 }

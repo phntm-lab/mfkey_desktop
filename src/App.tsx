@@ -5,6 +5,7 @@ import { useUiStore } from "./store/useUiStore";
 import { SCREEN_COMPONENTS } from "./screens/registry";
 import { useIpcEvents } from "./lib/ipc/useIpcEvents";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { DisclaimerGate } from "./components/DisclaimerGate";
 
 function App() {
   useIpcEvents();
@@ -14,11 +15,14 @@ function App() {
   const Screen = SCREEN_COMPONENTS[activeScreen];
 
   return (
-    <AppShell title={t(`screens.${activeScreen}.title`)}>
-      <ErrorBoundary key={activeScreen}>
-        <Screen />
-      </ErrorBoundary>
-    </AppShell>
+    <>
+      <AppShell title={t(`screens.${activeScreen}.title`)}>
+        <ErrorBoundary key={activeScreen}>
+          <Screen />
+        </ErrorBoundary>
+      </AppShell>
+      <DisclaimerGate />
+    </>
   );
 }
 
