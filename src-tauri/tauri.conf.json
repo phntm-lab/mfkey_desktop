@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "mfkey_desktop",
-        "width": 800,
-        "height": 600
+        "title": "MFKey Desktop",
+        "width": 1100,
+        "height": 700,
+        "minWidth": 880,
+        "minHeight": 560,
+        "resizable": true,
+        "center": true
       }
     ],
     "security": {
