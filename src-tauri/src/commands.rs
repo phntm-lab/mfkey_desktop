@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};
+use tauri::AppHandle;
+use tauri_plugin_dialog::DialogExt;
 
 use crate::error::CommandError;
 
@@ -44,8 +46,16 @@ pub fn cancel_attack() -> Result<(), CommandError> {
 }
 
 #[tauri::command]
-pub fn pick_input_file() -> Result<Option<String>, CommandError> {
-    Err(CommandError::not_implemented("pick_input_file"))
+pub fn pick_input_file(app: AppHandle) -> Result<Option<String>, CommandError> {
+    let picked = app
+        .dialog()
+        .file()
+        .add_filter("Nonce logs", &["log"])
+        .blocking_pick_file();
+
+    Ok(picked
+        .and_then(|file| file.into_path().ok())
+        .map(|path| path.to_string_lossy().into_owned()))
 }
 
 #[tauri::command]
