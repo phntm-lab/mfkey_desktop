@@ -18,6 +18,11 @@ export interface AutoRequest {
   deviceId: string;
 }
 
+export interface ConnectRequest {
+  transport: TransportKind;
+  deviceId: string;
+}
+
 export interface SaveKeysRequest {
   keys: string[];
   dictPaths: string[];
@@ -30,6 +35,7 @@ export const COMMANDS = {
   saveRecoveredKeys: "save_recovered_keys",
   listFlipperUsb: "list_flipper_usb",
   scanBle: "scan_ble",
+  connectFlipper: "connect_flipper",
   startAuto: "start_auto",
 } as const;
 
@@ -57,6 +63,10 @@ export function listFlipperUsb(): Promise<FlipperDevice[]> {
 
 export function scanBle(): Promise<FlipperDevice[]> {
   return invoke(COMMANDS.scanBle);
+}
+
+export function connectFlipper(request: ConnectRequest): Promise<void> {
+  return invoke(COMMANDS.connectFlipper, { request });
 }
 
 export function startAuto(request: AutoRequest): Promise<void> {

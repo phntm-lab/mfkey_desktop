@@ -65,6 +65,7 @@ pub struct DeviceStatusPayload {
     pub status: String,
     pub device_id: Option<String>,
     pub transport: Option<TransportKind>,
+    pub message: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]

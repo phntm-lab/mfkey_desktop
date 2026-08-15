@@ -48,6 +48,15 @@ export function useIpcEvents(): void {
   const setAttackError = useAttackStore((s) => s.setError);
   const markFinished = useAttackStore((s) => s.markFinished);
   const setConnectionStatus = useConnectionStore((s) => s.setStatus);
+  const setConnectionError = useConnectionStore((s) => s.setError);
+
+  const handleDeviceStatus = useCallback(
+    (payload: EventPayloadMap["device://status"]) => {
+      setConnectionStatus(payload.status);
+      setConnectionError(payload.status === "error" ? (payload.message ?? null) : null);
+    },
+    [setConnectionStatus, setConnectionError],
+  );
 
   const throttledProgress = useMemo(
     () => throttle(setProgress, PROGRESS_THROTTLE_MS),
@@ -99,7 +108,5 @@ export function useIpcEvents(): void {
   );
   useTauriEvent("attack://summary", handleSummary);
   useTauriEvent("attack://error", handleError);
-  useTauriEvent("device://status", (payload) =>
-    setConnectionStatus(payload.status),
-  );
+  useTauriEvent("device://status", handleDeviceStatus);
 }

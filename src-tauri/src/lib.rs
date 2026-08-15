@@ -17,6 +17,7 @@ pub fn run() {
             commands::save_recovered_keys,
             commands::list_flipper_usb,
             commands::scan_ble,
+            commands::connect_flipper,
             commands::start_auto,
         ])
         .run(tauri::generate_context!())

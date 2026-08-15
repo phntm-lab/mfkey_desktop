@@ -28,6 +28,7 @@ export interface DeviceStatusPayload {
   status: ConnectionStatus;
   deviceId?: string;
   transport?: TransportKind;
+  message?: string;
 }
 
 export interface TransferProgressPayload {

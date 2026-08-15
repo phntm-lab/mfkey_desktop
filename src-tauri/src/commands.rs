@@ -14,7 +14,8 @@ use mfkey_core::core::reporter::Reporter;
 
 use crate::error::CommandError;
 use crate::events::{
-    ATTACK_ERROR, ATTACK_SUMMARY, AttackErrorPayload, AttackSummaryPayload, DictOutputPayload,
+    ATTACK_ERROR, ATTACK_SUMMARY, AttackErrorPayload, AttackSummaryPayload, DEVICE_STATUS,
+    DeviceStatusPayload, DictOutputPayload,
 };
 use crate::reporter::TauriReporter;
 
@@ -48,6 +49,13 @@ pub struct FileAttackRequest {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AutoRequest {
+    pub transport: TransportKind,
+    pub device_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConnectRequest {
     pub transport: TransportKind,
     pub device_id: String,
 }
@@ -262,6 +270,59 @@ pub fn scan_ble() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
             transport: TransportKind::Ble,
         })
         .collect())
+}
+
+#[tauri::command]
+pub fn connect_flipper(app: AppHandle, request: ConnectRequest) -> Result<(), CommandError> {
+    let ConnectRequest {
+        transport,
+        device_id,
+    } = request;
+
+    emit_device_status(&app, "connecting", Some(&device_id), Some(transport), None);
+
+    std::thread::spawn(move || match probe_device(transport, &device_id) {
+        Ok(()) => emit_device_status(&app, "connected", Some(&device_id), Some(transport), None),
+        Err(e) => emit_device_status(
+            &app,
+            "error",
+            Some(&device_id),
+            Some(transport),
+            Some(&e.to_string()),
+        ),
+    });
+
+    Ok(())
+}
+
+fn probe_device(transport: TransportKind, device_id: &str) -> mfkey_flipper::Result<()> {
+    match transport {
+        TransportKind::Usb => {
+            mfkey_flipper::FlipperSession::open(device_id)?;
+            Ok(())
+        }
+        TransportKind::Ble => {
+            let ble = mfkey_flipper::ble::connection::connect_ble_blocking(device_id)?;
+            mfkey_flipper::FlipperSession::from_transport(Box::new(ble))?;
+            Ok(())
+        }
+    }
+}
+
+fn emit_device_status(
+    app: &AppHandle,
+    status: &str,
+    device_id: Option<&str>,
+    transport: Option<TransportKind>,
+    message: Option<&str>,
+) {
+    let payload = DeviceStatusPayload {
+        status: status.to_string(),
+        device_id: device_id.map(|s| s.to_string()),
+        transport,
+        message: message.map(|s| s.to_string()),
+    };
+    let _ = app.emit(DEVICE_STATUS, payload);
 }
 
 #[tauri::command]
