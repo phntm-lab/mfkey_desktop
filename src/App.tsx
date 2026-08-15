@@ -4,6 +4,7 @@ import { useUiStore } from "./store/useUiStore";
 import { SCREEN_MAP } from "./config/screens";
 import { SCREEN_COMPONENTS } from "./screens/registry";
 import { useIpcEvents } from "./lib/ipc/useIpcEvents";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function App() {
   useIpcEvents();
@@ -14,7 +15,9 @@ function App() {
 
   return (
     <AppShell title={meta.title}>
-      <Screen />
+      <ErrorBoundary key={activeScreen}>
+        <Screen />
+      </ErrorBoundary>
     </AppShell>
   );
 }
