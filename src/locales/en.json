@@ -23,9 +23,15 @@
     "settings": {
       "title": "Settings",
       "languageTitle": "Language",
-      "languagePlaceholder": "Language selection will appear here.",
       "appearanceTitle": "Appearance",
-      "appearancePlaceholder": "Theme selection will appear here."
+      "languageOption": {
+        "en": "English",
+        "ru": "Русский"
+      },
+      "themeOption": {
+        "dark": "Dark",
+        "light": "Light"
+      }
     },
     "about": {
       "title": "About",

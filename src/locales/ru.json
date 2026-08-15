@@ -23,9 +23,15 @@
     "settings": {
       "title": "Настройки",
       "languageTitle": "Язык",
-      "languagePlaceholder": "Здесь появится выбор языка.",
       "appearanceTitle": "Оформление",
-      "appearancePlaceholder": "Здесь появится выбор темы."
+      "languageOption": {
+        "en": "English",
+        "ru": "Русский"
+      },
+      "themeOption": {
+        "dark": "Тёмная",
+        "light": "Светлая"
+      }
     },
     "about": {
       "title": "О программе",
