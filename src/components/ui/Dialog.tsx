@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { CloseIcon } from "../layout/icons";
+import { X } from "lucide-react";
 
 interface DialogProps {
   open: boolean;
@@ -41,7 +41,7 @@ export function Dialog({ open, onClose, title, children, footer }: DialogProps) 
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-raised hover:text-fg"
           >
-            <CloseIcon size={16} />
+            <X size={16} />
           </button>
         </div>
         <div className="p-4 text-sm text-fg">{children}</div>

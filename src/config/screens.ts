@@ -1,5 +1,4 @@
-import type { ComponentType } from "react";
-import { KeyIcon, ChipIcon, GearIcon, InfoIcon, type IconProps } from "../components/layout/icons";
+import { Key, Cpu, Settings, Info, type LucideIcon } from "lucide-react";
 
 export type ScreenId = "attack" | "device" | "settings" | "about";
 
@@ -10,14 +9,14 @@ export interface ScreenMeta {
   label: string;
   title: string;
   group: ScreenGroup;
-  Icon: ComponentType<IconProps>;
+  Icon: LucideIcon;
 }
 
 export const SCREENS: ScreenMeta[] = [
-  { id: "attack", label: "Attack", title: "Attack", group: "primary", Icon: KeyIcon },
-  { id: "device", label: "Device", title: "Device", group: "primary", Icon: ChipIcon },
-  { id: "settings", label: "Settings", title: "Settings", group: "secondary", Icon: GearIcon },
-  { id: "about", label: "About", title: "About", group: "secondary", Icon: InfoIcon },
+  { id: "attack", label: "Attack", title: "Attack", group: "primary", Icon: Key },
+  { id: "device", label: "Device", title: "Device", group: "primary", Icon: Cpu },
+  { id: "settings", label: "Settings", title: "Settings", group: "secondary", Icon: Settings },
+  { id: "about", label: "About", title: "About", group: "secondary", Icon: Info },
 ];
 
 export const SCREEN_MAP: Record<ScreenId, ScreenMeta> = Object.fromEntries(

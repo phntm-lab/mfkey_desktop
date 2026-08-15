@@ -66,7 +66,7 @@ function RailButton({
           className="absolute -left-3 top-2 bottom-2 w-0.5 rounded-r bg-accent"
         />
       )}
-      <Icon size={18} />
+      <Icon size={18} strokeWidth={1.75} />
     </button>
   );
 }
