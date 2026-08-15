@@ -60,6 +60,17 @@ export function GearIcon({ size = 18, className }: IconProps) {
   );
 }
 
+export function CloseIcon({ size = 18, className }: IconProps) {
+  return base(
+    size,
+    className,
+    <>
+      <path d="M6 6l12 12" />
+      <path d="M18 6 6 18" />
+    </>,
+  );
+}
+
 export function InfoIcon({ size = 18, className }: IconProps) {
   return base(
     size,

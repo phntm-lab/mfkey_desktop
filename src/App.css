@@ -16,6 +16,7 @@
   --color-accent: var(--c-accent);
   --color-accent-hover: var(--c-accent-hover);
   --color-accent-soft: var(--c-accent-soft);
+  --color-on-accent: var(--c-on-accent);
 
   --color-success: var(--c-success);
   --color-warning: var(--c-warning);
@@ -49,6 +50,7 @@
   --c-accent: #ff8a00;
   --c-accent-hover: #ffa333;
   --c-accent-soft: rgba(255, 138, 0, 0.12);
+  --c-on-accent: #0a0a0b;
 
   --c-success: #3ddc84;
   --c-warning: #ffb020;
@@ -74,6 +76,7 @@
   --c-accent: #d96b00;
   --c-accent-hover: #b95a00;
   --c-accent-soft: rgba(217, 107, 0, 0.1);
+  --c-on-accent: #ffffff;
 
   --c-success: #1a9d54;
   --c-warning: #b5730a;
@@ -110,4 +113,18 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.progress-indeterminate {
+  width: 33%;
+  animation: progress-indeterminate 1.1s ease-in-out infinite;
 }

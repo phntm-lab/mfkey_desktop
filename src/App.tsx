@@ -2,6 +2,7 @@ import "./App.css";
 import { AppShell } from "./components/layout/AppShell";
 import { useUiStore } from "./store/useUiStore";
 import { SCREEN_MAP } from "./config/screens";
+import { Showcase } from "./components/ui/Showcase";
 
 function App() {
   const activeScreen = useUiStore((s) => s.activeScreen);
@@ -9,11 +10,7 @@ function App() {
 
   return (
     <AppShell title={meta.title}>
-      <div className="p-6">
-        <p className="text-sm text-muted">
-          {meta.label} screen placeholder.
-        </p>
-      </div>
+      <Showcase />
     </AppShell>
   );
 }
