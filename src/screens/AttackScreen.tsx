@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileSearch, FileText, Play, Square } from "lucide-react";
+import {
+  AlertTriangle,
+  Download,
+  FileSearch,
+  FileText,
+  Play,
+  Square,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
@@ -13,9 +20,15 @@ import {
 import {
   cancelAttack,
   pickInputFile,
+  saveRecoveredKeys,
   startFileAttack,
 } from "../lib/ipc/commands";
 import { toAppError } from "../lib/errors";
+
+interface ExportInfo {
+  tone: "success" | "danger";
+  text: string;
+}
 
 const STATUS_TONE: Record<AttackStatus, StatusTone> = {
   idle: "neutral",
@@ -71,6 +84,10 @@ export function AttackScreen() {
   const status = useAttackStore((s) => s.status);
   const stage = useAttackStore((s) => s.stage);
   const progress = useAttackStore((s) => s.progress);
+  const foundKeys = useAttackStore((s) => s.foundKeys);
+  const dictOutputs = useAttackStore((s) => s.dictOutputs);
+  const candidateKeys = useAttackStore((s) => s.candidateKeys);
+  const error = useAttackStore((s) => s.error);
   const inputPath = useAttackStore((s) => s.inputPath);
   const cancelRequested = useAttackStore((s) => s.cancelRequested);
   const startedAt = useAttackStore((s) => s.startedAt);
@@ -83,8 +100,13 @@ export function AttackScreen() {
   const markFinished = useAttackStore((s) => s.markFinished);
   const reset = useAttackStore((s) => s.reset);
 
+  const [exportInfo, setExportInfo] = useState<ExportInfo | null>(null);
+
   const isActive = status === "loading" || status === "running";
   const elapsed = useElapsed(startedAt, finishedAt, isActive);
+  const hasResults = foundKeys.length > 0 || dictOutputs.length > 0;
+  const isTerminal =
+    status === "success" || status === "cancelled" || status === "error";
 
   const indeterminate =
     status === "loading" ||
@@ -103,6 +125,7 @@ export function AttackScreen() {
   const handleStart = useCallback(async () => {
     if (!inputPath) return;
     reset();
+    setExportInfo(null);
     markStarted(Date.now());
     setStatus("loading");
     try {
@@ -122,6 +145,25 @@ export function AttackScreen() {
       setError(toAppError(e, "command").message);
     }
   }, [setCancelRequested, setError]);
+
+  const handleExport = useCallback(async () => {
+    try {
+      const destination = await saveRecoveredKeys({
+        keys: foundKeys.map((k) => k.key),
+        dictPaths: dictOutputs.map((d) => d.path),
+      });
+      setExportInfo(
+        destination
+          ? {
+              tone: "success",
+              text: t("screens.attack.exportedTo", { path: destination }),
+            }
+          : null,
+      );
+    } catch (e) {
+      setExportInfo({ tone: "danger", text: toAppError(e, "command").message });
+    }
+  }, [foundKeys, dictOutputs, t]);
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -205,6 +247,107 @@ export function AttackScreen() {
                   {progress.processed} / {progress.total}
                 </span>
               </div>
+            )}
+          </div>
+        </Panel>
+      )}
+
+      {status === "error" && error && (
+        <Panel title={t("screens.attack.errorTitle")}>
+          <div className="flex items-start gap-3 text-sm text-danger">
+            <AlertTriangle size={18} strokeWidth={1.75} className="shrink-0" />
+            <p className="min-w-0 break-words">{error}</p>
+          </div>
+        </Panel>
+      )}
+
+      {(hasResults || isTerminal) && status !== "error" && (
+        <Panel
+          title={t("screens.attack.resultsTitle")}
+          actions={
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleExport}
+              disabled={!hasResults}
+            >
+              <Download size={16} strokeWidth={1.75} />
+              {t("screens.attack.export")}
+            </Button>
+          }
+        >
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-6 text-sm">
+              <div className="flex items-baseline gap-2">
+                <span className="text-muted">
+                  {t("screens.attack.foundKeysLabel")}
+                </span>
+                <span className="font-mono text-fg">{foundKeys.length}</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-muted">
+                  {t("screens.attack.candidateKeysLabel")}
+                </span>
+                <span className="font-mono text-fg">{candidateKeys}</span>
+              </div>
+            </div>
+
+            {foundKeys.length > 0 ? (
+              <ul className="flex flex-col gap-2">
+                {foundKeys.map((k, index) => (
+                  <li
+                    key={`${k.key}-${index}`}
+                    className="flex items-center justify-between gap-3 rounded-md border border-line bg-raised px-3 py-2"
+                  >
+                    <span className="font-mono text-sm text-fg">{k.key}</span>
+                    <span className="flex shrink-0 items-center gap-2 text-xs text-muted">
+                      {k.uid && <span>UID {k.uid}</span>}
+                      {k.keyType && (
+                        <span>
+                          {t("screens.attack.keyType", { type: k.keyType })}
+                        </span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted">{t("screens.attack.noKeys")}</p>
+            )}
+
+            {dictOutputs.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <h3 className="text-xs font-medium uppercase tracking-wide text-muted">
+                  {t("screens.attack.dictionariesLabel")}
+                </h3>
+                {dictOutputs.map((d) => (
+                  <div
+                    key={d.path}
+                    className="flex items-center justify-between gap-3 rounded-md border border-line bg-raised px-3 py-2 text-sm"
+                  >
+                    <span
+                      className="min-w-0 truncate font-mono text-fg"
+                      title={d.path}
+                    >
+                      {basename(d.path)}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted">
+                      UID {d.uid} ·{" "}
+                      {t("screens.attack.keysCount", { count: d.keyCount })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {exportInfo && (
+              <p
+                className={`text-xs ${
+                  exportInfo.tone === "success" ? "text-success" : "text-danger"
+                }`}
+              >
+                {exportInfo.text}
+              </p>
             )}
           </div>
         </Panel>
