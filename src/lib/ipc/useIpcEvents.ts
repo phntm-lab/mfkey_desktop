@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import {
   onTauriEvent,
@@ -38,10 +38,15 @@ export function useTauriEvent<K extends EventName>(
 }
 
 export function useIpcEvents(): void {
+  const setStatus = useAttackStore((s) => s.setStatus);
+  const setStage = useAttackStore((s) => s.setStage);
   const setProgress = useAttackStore((s) => s.setProgress);
   const addFoundKey = useAttackStore((s) => s.addFoundKey);
-  const setDictOutputs = useAttackStore((s) => s.setDictOutputs);
+  const addHardNestedLine = useAttackStore((s) => s.addHardNestedLine);
+  const applySummary = useAttackStore((s) => s.applySummary);
+  const setCancelRequested = useAttackStore((s) => s.setCancelRequested);
   const setAttackError = useAttackStore((s) => s.setError);
+  const markFinished = useAttackStore((s) => s.markFinished);
   const setConnectionStatus = useConnectionStore((s) => s.setStatus);
 
   const throttledProgress = useMemo(
@@ -49,12 +54,51 @@ export function useIpcEvents(): void {
     [setProgress],
   );
 
-  useTauriEvent("attack://progress", throttledProgress);
-  useTauriEvent("attack://found-key", addFoundKey);
-  useTauriEvent("attack://summary", (payload) =>
-    setDictOutputs(payload.dictOutputs),
+  const handleProgress = useCallback(
+    (payload: EventPayloadMap["attack://progress"]) => {
+      setStage(payload.stage);
+      if (
+        (payload.stage === "running" || payload.stage === "hardnested") &&
+        useAttackStore.getState().status === "loading"
+      ) {
+        setStatus("running");
+      }
+      throttledProgress(payload);
+    },
+    [setStage, setStatus, throttledProgress],
   );
-  useTauriEvent("attack://error", (payload) => setAttackError(payload.message));
+
+  const handleSummary = useCallback(
+    (payload: EventPayloadMap["attack://summary"]) => {
+      applySummary({
+        dictOutputs: payload.dictOutputs,
+        candidateKeys: payload.candidateKeys,
+        foundKeys: payload.foundKeys,
+      });
+      setStatus(payload.status === "success" ? "success" : "cancelled");
+      setCancelRequested(false);
+      markFinished(Date.now());
+    },
+    [applySummary, setStatus, setCancelRequested, markFinished],
+  );
+
+  const handleError = useCallback(
+    (payload: EventPayloadMap["attack://error"]) => {
+      setAttackError(payload.message);
+      setStatus("error");
+      setCancelRequested(false);
+      markFinished(Date.now());
+    },
+    [setAttackError, setStatus, setCancelRequested, markFinished],
+  );
+
+  useTauriEvent("attack://progress", handleProgress);
+  useTauriEvent("attack://found-key", addFoundKey);
+  useTauriEvent("attack://hardnested", (payload) =>
+    addHardNestedLine(payload.line),
+  );
+  useTauriEvent("attack://summary", handleSummary);
+  useTauriEvent("attack://error", handleError);
   useTauriEvent("device://status", (payload) =>
     setConnectionStatus(payload.status),
   );

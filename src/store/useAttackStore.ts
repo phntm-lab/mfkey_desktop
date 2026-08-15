@@ -31,13 +31,26 @@ export interface AttackProgress {
   percent: number;
 }
 
+export interface AttackSummary {
+  dictOutputs: DictOutput[];
+  candidateKeys: number;
+  foundKeys: number;
+}
+
+const MAX_HARDNESTED_LINES = 500;
+
 interface AttackState {
   status: AttackStatus;
   stage: AttackStage;
   progress: AttackProgress | null;
   foundKeys: FoundKey[];
   dictOutputs: DictOutput[];
+  hardnestedLines: string[];
+  candidateKeys: number;
+  summaryFoundCount: number;
+  cancelRequested: boolean;
   error: string | null;
+  inputPath: string | null;
   startedAt: number | null;
   finishedAt: number | null;
   setStatus: (status: AttackStatus) => void;
@@ -45,33 +58,60 @@ interface AttackState {
   setProgress: (progress: AttackProgress | null) => void;
   addFoundKey: (key: FoundKey) => void;
   setDictOutputs: (outputs: DictOutput[]) => void;
+  addHardNestedLine: (line: string) => void;
+  applySummary: (summary: AttackSummary) => void;
+  setCancelRequested: (requested: boolean) => void;
   setError: (error: string | null) => void;
+  setInputPath: (path: string | null) => void;
   markStarted: (at: number) => void;
   markFinished: (at: number) => void;
   reset: () => void;
 }
 
-const initialState = {
+const runInitialState = {
   status: "idle" as AttackStatus,
   stage: "idle" as AttackStage,
   progress: null,
   foundKeys: [] as FoundKey[],
   dictOutputs: [] as DictOutput[],
+  hardnestedLines: [] as string[],
+  candidateKeys: 0,
+  summaryFoundCount: 0,
+  cancelRequested: false,
   error: null,
   startedAt: null,
   finishedAt: null,
 };
 
 export const useAttackStore = create<AttackState>((set) => ({
-  ...initialState,
+  ...runInitialState,
+  inputPath: null,
   setStatus: (status) => set({ status }),
   setStage: (stage) => set({ stage }),
   setProgress: (progress) => set({ progress }),
   addFoundKey: (key) =>
     set((state) => ({ foundKeys: [...state.foundKeys, key] })),
   setDictOutputs: (dictOutputs) => set({ dictOutputs }),
+  addHardNestedLine: (line) =>
+    set((state) => {
+      const next = [...state.hardnestedLines, line];
+      return {
+        hardnestedLines:
+          next.length > MAX_HARDNESTED_LINES
+            ? next.slice(next.length - MAX_HARDNESTED_LINES)
+            : next,
+      };
+    }),
+  applySummary: (summary) =>
+    set({
+      dictOutputs: summary.dictOutputs,
+      candidateKeys: summary.candidateKeys,
+      summaryFoundCount: summary.foundKeys,
+    }),
+  setCancelRequested: (cancelRequested) => set({ cancelRequested }),
   setError: (error) => set({ error }),
+  setInputPath: (inputPath) => set({ inputPath }),
   markStarted: (at) => set({ startedAt: at, finishedAt: null }),
   markFinished: (at) => set({ finishedAt: at }),
-  reset: () => set(initialState),
+  reset: () => set(runInitialState),
 }));
