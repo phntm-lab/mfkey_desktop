@@ -2285,6 +2285,7 @@ name = "mfkey_desktop"
 version = "0.1.0"
 dependencies = [
  "mfkey-core",
+ "mfkey-flipper",
  "serde",
  "serde_json",
  "tauri",

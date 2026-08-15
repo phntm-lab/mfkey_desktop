@@ -28,4 +28,11 @@ impl CommandError {
             message: message.to_string(),
         }
     }
+
+    pub fn device(message: &str) -> Self {
+        Self {
+            code: "device".to_string(),
+            message: message.to_string(),
+        }
+    }
 }

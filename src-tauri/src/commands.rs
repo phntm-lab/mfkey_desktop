@@ -238,7 +238,16 @@ pub fn pick_input_file(app: AppHandle) -> Result<Option<String>, CommandError> {
 
 #[tauri::command]
 pub fn list_flipper_usb() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
-    Err(CommandError::not_implemented("list_flipper_usb"))
+    let ports = mfkey_flipper::find::find_all_flippers()
+        .map_err(|e| CommandError::device(&format!("Failed to enumerate USB ports: {e}")))?;
+    Ok(ports
+        .into_iter()
+        .map(|p| FlipperDeviceInfo {
+            id: p.port,
+            name: p.label,
+            transport: TransportKind::Usb,
+        })
+        .collect())
 }
 
 #[tauri::command]
