@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "crates/mfkey-core"]
+members = [".", "crates/mfkey-core", "crates/mfkey-flipper"]
 resolver = "3"
 
 [workspace.package]
