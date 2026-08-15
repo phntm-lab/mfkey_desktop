@@ -1,10 +1,86 @@
 @import "tailwindcss";
 
-:root {
+@theme inline {
+  --color-base: var(--c-base);
+  --color-surface: var(--c-surface);
+  --color-raised: var(--c-raised);
+  --color-overlay: var(--c-overlay);
+
+  --color-fg: var(--c-fg);
+  --color-muted: var(--c-muted);
+  --color-subtle: var(--c-subtle);
+
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+
+  --color-accent: var(--c-accent);
+  --color-accent-hover: var(--c-accent-hover);
+  --color-accent-soft: var(--c-accent-soft);
+
+  --color-success: var(--c-success);
+  --color-warning: var(--c-warning);
+  --color-danger: var(--c-danger);
+  --color-info: var(--c-info);
+
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu,
     Cantarell, "Noto Sans", system-ui, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
     "Liberation Mono", "Roboto Mono", monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+:root,
+[data-theme="dark"] {
+  --c-base: #0a0a0b;
+  --c-surface: #141417;
+  --c-raised: #1c1c20;
+  --c-overlay: rgba(0, 0, 0, 0.72);
+
+  --c-fg: #ececee;
+  --c-muted: #9a9aa4;
+  --c-subtle: #66666e;
+
+  --c-line: #2a2a30;
+  --c-line-strong: #3a3a42;
+
+  --c-accent: #ff8a00;
+  --c-accent-hover: #ffa333;
+  --c-accent-soft: rgba(255, 138, 0, 0.12);
+
+  --c-success: #3ddc84;
+  --c-warning: #ffb020;
+  --c-danger: #ff5f56;
+  --c-info: #4aa8ff;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --c-base: #f4f4f3;
+  --c-surface: #ffffff;
+  --c-raised: #ffffff;
+  --c-overlay: rgba(0, 0, 0, 0.4);
+
+  --c-fg: #17171a;
+  --c-muted: #56565e;
+  --c-subtle: #8a8a92;
+
+  --c-line: #e4e4e2;
+  --c-line-strong: #cfcfcc;
+
+  --c-accent: #d96b00;
+  --c-accent-hover: #b95a00;
+  --c-accent-soft: rgba(217, 107, 0, 0.1);
+
+  --c-success: #1a9d54;
+  --c-warning: #b5730a;
+  --c-danger: #d13c33;
+  --c-info: #1f74d0;
+
+  color-scheme: light;
 }
 
 *,
@@ -28,8 +104,8 @@ body {
 
 body {
   font-family: var(--font-sans);
-  color: #e5e5e7;
-  background-color: #0a0a0b;
+  color: var(--c-fg);
+  background-color: var(--c-base);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
