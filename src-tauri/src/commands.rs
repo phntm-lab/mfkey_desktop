@@ -252,7 +252,16 @@ pub fn list_flipper_usb() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
 
 #[tauri::command]
 pub fn scan_ble() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
-    Err(CommandError::not_implemented("scan_ble"))
+    let devices = mfkey_flipper::ble::scanner::list_ble_devices_blocking()
+        .map_err(|e| CommandError::device(&format!("BLE scan failed: {e}")))?;
+    Ok(devices
+        .into_iter()
+        .map(|d| FlipperDeviceInfo {
+            id: d.id,
+            name: d.name,
+            transport: TransportKind::Ble,
+        })
+        .collect())
 }
 
 #[tauri::command]
