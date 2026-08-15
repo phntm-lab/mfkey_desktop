@@ -1,3 +1,4 @@
+import { applyTheme } from "../theme";
 import { useApplicationStore } from "../../store/useApplicationStore";
 import { useDisclaimerStore } from "../../store/useDisclaimerStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
@@ -12,6 +13,7 @@ async function hydrateStores(): Promise<void> {
     theme: settings.theme,
   });
   useDisclaimerStore.getState().hydrate(settings.disclaimerAccepted);
+  applyTheme(settings.theme);
 }
 
 function subscribePersistence(): void {
@@ -30,6 +32,14 @@ function subscribePersistence(): void {
   });
 }
 
+function subscribeThemeSync(): void {
+  useSettingsStore.subscribe((state, prev) => {
+    if (state.theme !== prev.theme) {
+      applyTheme(state.theme);
+    }
+  });
+}
+
 export async function bootstrapPersistence(): Promise<void> {
   if (bootstrapped) {
     return;
@@ -37,5 +47,6 @@ export async function bootstrapPersistence(): Promise<void> {
   bootstrapped = true;
   await hydrateStores();
   subscribePersistence();
+  subscribeThemeSync();
   useApplicationStore.getState().setReady(true);
 }
