@@ -48,9 +48,27 @@
     "device": {
       "title": "Device",
       "panelTitle": "Flipper connection",
-      "statusDisconnected": "Disconnected",
       "description": "Connect a Flipper Zero over USB or Bluetooth LE to run live attacks.",
-      "scan": "Scan for devices"
+      "transportLabel": "Transport",
+      "transport": {
+        "usb": "USB",
+        "ble": "Bluetooth LE"
+      },
+      "bleHint": "Pair the Flipper in your operating system's Bluetooth settings before scanning.",
+      "scan": "Scan for devices",
+      "scanning": "Scanning…",
+      "connect": "Connect",
+      "connecting": "Connecting…",
+      "devicesTitle": "Discovered devices",
+      "noDevices": "No devices found. Make sure the Flipper is connected, then scan.",
+      "errorTitle": "Error",
+      "status": {
+        "disconnected": "Disconnected",
+        "scanning": "Scanning",
+        "connecting": "Connecting",
+        "connected": "Connected",
+        "error": "Error"
+      }
     },
     "settings": {
       "title": "Settings",

@@ -48,9 +48,27 @@
     "device": {
       "title": "Устройство",
       "panelTitle": "Подключение Flipper",
-      "statusDisconnected": "Отключено",
       "description": "Подключите Flipper Zero по USB или Bluetooth LE для live-атак.",
-      "scan": "Поиск устройств"
+      "transportLabel": "Транспорт",
+      "transport": {
+        "usb": "USB",
+        "ble": "Bluetooth LE"
+      },
+      "bleHint": "Перед поиском выполните сопряжение Flipper в настройках Bluetooth операционной системы.",
+      "scan": "Поиск устройств",
+      "scanning": "Поиск…",
+      "connect": "Подключить",
+      "connecting": "Подключение…",
+      "devicesTitle": "Найденные устройства",
+      "noDevices": "Устройства не найдены. Убедитесь, что Flipper подключён, и запустите поиск.",
+      "errorTitle": "Ошибка",
+      "status": {
+        "disconnected": "Отключено",
+        "scanning": "Поиск",
+        "connecting": "Подключение",
+        "connected": "Подключено",
+        "error": "Ошибка"
+      }
     },
     "settings": {
       "title": "Настройки",
