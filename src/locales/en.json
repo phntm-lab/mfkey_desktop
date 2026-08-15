@@ -11,7 +11,19 @@
       "title": "Attack",
       "panelTitle": "Offline attack",
       "description": "Select a Flipper nonce log to recover MIFARE Classic keys.",
-      "selectFile": "Select log file"
+      "selectFile": "Select log file",
+      "noFile": "No file selected",
+      "start": "Start attack",
+      "cancel": "Cancel",
+      "cancelling": "Cancelling…",
+      "status": {
+        "idle": "Idle",
+        "loading": "Loading",
+        "running": "Running",
+        "success": "Completed",
+        "cancelled": "Cancelled",
+        "error": "Error"
+      }
     },
     "device": {
       "title": "Device",

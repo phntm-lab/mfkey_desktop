@@ -11,7 +11,19 @@
       "title": "Атака",
       "panelTitle": "Офлайн-атака",
       "description": "Выберите лог nonce с Flipper для восстановления ключей MIFARE Classic.",
-      "selectFile": "Выбрать файл лога"
+      "selectFile": "Выбрать файл лога",
+      "noFile": "Файл не выбран",
+      "start": "Запустить атаку",
+      "cancel": "Отменить",
+      "cancelling": "Отмена…",
+      "status": {
+        "idle": "Ожидание",
+        "loading": "Загрузка",
+        "running": "Выполняется",
+        "success": "Завершено",
+        "cancelled": "Отменено",
+        "error": "Ошибка"
+      }
     },
     "device": {
       "title": "Устройство",
