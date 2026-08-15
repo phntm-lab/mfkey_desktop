@@ -18,10 +18,16 @@ export interface AutoRequest {
   deviceId: string;
 }
 
+export interface SaveKeysRequest {
+  keys: string[];
+  dictPaths: string[];
+}
+
 export const COMMANDS = {
   startFileAttack: "start_file_attack",
   cancelAttack: "cancel_attack",
   pickInputFile: "pick_input_file",
+  saveRecoveredKeys: "save_recovered_keys",
   listFlipperUsb: "list_flipper_usb",
   scanBle: "scan_ble",
   startAuto: "start_auto",
@@ -37,6 +43,12 @@ export function cancelAttack(): Promise<void> {
 
 export function pickInputFile(): Promise<string | null> {
   return invoke(COMMANDS.pickInputFile);
+}
+
+export function saveRecoveredKeys(
+  request: SaveKeysRequest,
+): Promise<string | null> {
+  return invoke(COMMANDS.saveRecoveredKeys, { request });
 }
 
 export function listFlipperUsb(): Promise<FlipperDevice[]> {

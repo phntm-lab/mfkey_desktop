@@ -8,14 +8,7 @@ export type AttackStatus =
   | "error"
   | "cancelled";
 
-export type AttackStage =
-  | "idle"
-  | "loading"
-  | "mfkey32"
-  | "static_nested"
-  | "static_encrypted"
-  | "hardnested"
-  | "summary";
+export type AttackStage = "idle" | "loading" | "running" | "hardnested";
 
 export type KeyType = "A" | "B";
 

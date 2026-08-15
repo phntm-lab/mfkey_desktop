@@ -11,9 +11,13 @@ import type {
 } from "../../store/useConnectionStore";
 import type { CommandError } from "./commands";
 
+export type AttackCompletionStatus = "success" | "cancelled";
+
 export interface AttackSummaryPayload {
   foundKeys: number;
+  candidateKeys: number;
   dictOutputs: DictOutput[];
+  status: AttackCompletionStatus;
 }
 
 export interface HardNestedPayload {
