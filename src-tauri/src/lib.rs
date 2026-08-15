@@ -1,6 +1,7 @@
 mod commands;
 mod error;
 mod events;
+mod reporter;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
