@@ -86,10 +86,13 @@ jobs:
 
       - name: Collect bundles with OS-labeled names
         shell: bash
+        env:
+          ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
         run: |
-          VERSION=$(jq -r .version src-tauri/tauri.conf.json)
+          VERSION=$(jq -r .version src-tauri/tauri.conf.json | tr -d '\r')
           mkdir -p dist
-          echo '${{ steps.tauri.outputs.artifactPaths }}' | jq -r '.[]' | while read -r f; do
+          echo "$ARTIFACT_PATHS" | jq -r '.[]' | tr -d '\r' | while IFS= read -r f; do
+            f="${f//\\//}"
             [ -z "$f" ] && continue
             [ -d "$f" ] && continue
             base=$(basename "$f")
