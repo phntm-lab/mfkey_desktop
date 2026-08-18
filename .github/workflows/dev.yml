@@ -90,7 +90,7 @@ jobs:
           ARTIFACT_PATHS: ${{ steps.tauri.outputs.artifactPaths }}
         run: |
           VERSION=$(jq -r .version src-tauri/tauri.conf.json | tr -d '\r')
-          mkdir -p dist
+          mkdir -p bundles
           echo "$ARTIFACT_PATHS" | jq -r '.[]' | tr -d '\r' | while IFS= read -r f; do
             f="${f//\\//}"
             [ -z "$f" ] && continue
@@ -100,14 +100,14 @@ jobs:
               *.exe | *.msi | *.deb | *.rpm | *.AppImage | *.dmg | *.app.tar.gz)
                 rest="${base#MFKey Desktop[_-]$VERSION[_-]}"
                 rest="${rest// /-}"
-                cp "$f" "dist/MFKey-Desktop_${VERSION}_${{ matrix.osName }}_${rest}"
+                cp "$f" "bundles/MFKey-Desktop_${VERSION}_${{ matrix.osName }}_${rest}"
                 ;;
             esac
           done
-          ls -la dist
+          ls -la bundles
 
       - uses: actions/upload-artifact@v4
         with:
           name: MFKey-Desktop-${{ matrix.label }}
           if-no-files-found: error
-          path: dist/*
+          path: bundles/*
