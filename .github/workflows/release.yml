@@ -1,23 +1,23 @@
-name: Build dev
+name: Build release
 
 on:
   push:
-    branches: [dev]
+    branches: [release]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
-  group: build-dev-${{ github.ref }}
-  cancel-in-progress: true
+  group: build-release-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  bundle:
-    name: Bundle (${{ matrix.label }})
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      endsWith(github.event.head_commit.message, '[build]')
+  publish:
+    name: Publish (${{ matrix.label }})
     strategy:
       fail-fast: false
       matrix:
@@ -75,10 +75,34 @@ jobs:
       - name: Install frontend dependencies
         run: bun install --frozen-lockfile
 
+      - name: Extract release notes from changelog
+        id: changelog
+        shell: bash
+        run: |
+          VERSION=$(jq -r .version src-tauri/tauri.conf.json)
+          BODY=$(awk -v ver="$VERSION" '
+            /^##[[:space:]]/ {
+              if (capture == 1) { exit }
+              if (index($0, ver) > 0) { capture = 1; next }
+            }
+            capture == 1 { print }
+          ' CHANGELOG.md)
+          if [ -z "$BODY" ]; then
+            BODY="See the assets to download and install this version."
+          fi
+          {
+            echo "body<<CHANGELOG_EOF"
+            echo "$BODY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tagName: v__VERSION__
+          releaseName: "MFKey Desktop v__VERSION__"
+          releaseBody: ${{ steps.changelog.outputs.body }}
+          releaseDraft: false
+          prerelease: false
           args: ${{ matrix.args }}
-          uploadWorkflowArtifacts: true
-          workflowArtifactNamePattern: "MFKey-Desktop-[platform]-[arch]-[bundle]"
