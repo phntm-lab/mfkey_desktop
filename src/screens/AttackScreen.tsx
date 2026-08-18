@@ -192,7 +192,9 @@ export function AttackScreen() {
         }
       >
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-muted">{t("screens.attack.description")}</p>
+          <p className="text-sm text-muted">
+            {t("screens.attack.description")}
+          </p>
 
           <div className="flex items-center gap-3 rounded-md border border-line bg-raised px-3 py-2">
             <FileText
@@ -397,7 +399,9 @@ export function AttackScreen() {
               ) : (
                 <ChevronRight size={14} strokeWidth={1.75} />
               )}
-              {t("screens.attack.linesCount", { count: hardnestedLines.length })}
+              {t("screens.attack.linesCount", {
+                count: hardnestedLines.length,
+              })}
             </button>
           }
         >

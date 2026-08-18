@@ -10,14 +10,20 @@ function clampPercent(value: number): number {
   return value;
 }
 
-export function ProgressBar({ value = 0, indeterminate = false, label }: ProgressBarProps) {
+export function ProgressBar({
+  value = 0,
+  indeterminate = false,
+  label,
+}: ProgressBarProps) {
   const percent = clampPercent(value);
   return (
     <div className="flex flex-col gap-1.5">
       {(label || !indeterminate) && (
         <div className="flex items-center justify-between text-xs text-muted">
           {label && <span>{label}</span>}
-          {!indeterminate && <span className="font-mono">{Math.round(percent)}%</span>}
+          {!indeterminate && (
+            <span className="font-mono">{Math.round(percent)}%</span>
+          )}
         </div>
       )}
       <div

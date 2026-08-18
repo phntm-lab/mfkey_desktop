@@ -1,6 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../store/useUiStore";
-import { SCREENS, type ScreenGroup, type ScreenMeta } from "../../config/screens";
+import {
+  SCREENS,
+  type ScreenGroup,
+  type ScreenMeta,
+} from "../../config/screens";
 
 function itemsFor(group: ScreenGroup): ScreenMeta[] {
   return SCREENS.filter((screen) => screen.group === group);

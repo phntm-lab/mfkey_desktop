@@ -3,7 +3,10 @@ import { applyTheme } from "../theme";
 import { useApplicationStore } from "../../store/useApplicationStore";
 import { useDisclaimerStore } from "../../store/useDisclaimerStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
-import { readPersistentSettings, writePersistentSetting } from "./persistentStore";
+import {
+  readPersistentSettings,
+  writePersistentSetting,
+} from "./persistentStore";
 
 let bootstrapped = false;
 

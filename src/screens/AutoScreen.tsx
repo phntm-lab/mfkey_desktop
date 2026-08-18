@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  AlertTriangle,
-  Bluetooth,
-  Play,
-  Square,
-  Usb,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, Bluetooth, Play, Square, Usb, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Panel } from "../components/ui/Panel";
 import { Button } from "../components/ui/Button";
@@ -107,7 +100,15 @@ export function AutoScreen() {
       setPhase("error");
       markFinished(Date.now());
     }
-  }, [device, deleteLogsAfter, reset, markStarted, setPhase, setError, markFinished]);
+  }, [
+    device,
+    deleteLogsAfter,
+    reset,
+    markStarted,
+    setPhase,
+    setError,
+    markFinished,
+  ]);
 
   const handleCancel = useCallback(async () => {
     setCancelRequested(true);
@@ -159,7 +160,11 @@ export function AutoScreen() {
           {device ? (
             <div className="flex items-center gap-3 rounded-md border border-line bg-raised px-3 py-2">
               {device.transport === "usb" ? (
-                <Usb size={18} strokeWidth={1.75} className="shrink-0 text-muted" />
+                <Usb
+                  size={18}
+                  strokeWidth={1.75}
+                  className="shrink-0 text-muted"
+                />
               ) : (
                 <Bluetooth
                   size={18}
@@ -176,7 +181,11 @@ export function AutoScreen() {
             </div>
           ) : (
             <div className="flex items-start gap-3 rounded-md border border-line bg-raised px-3 py-2 text-muted">
-              <AlertTriangle size={18} strokeWidth={1.75} className="shrink-0" />
+              <AlertTriangle
+                size={18}
+                strokeWidth={1.75}
+                className="shrink-0"
+              />
               <p className="text-xs">{t("screens.auto.noDevice")}</p>
             </div>
           )}
@@ -205,7 +214,11 @@ export function AutoScreen() {
                   : t("screens.auto.cancel")}
               </Button>
             ) : (
-              <Button variant="primary" onClick={handleStart} disabled={!device}>
+              <Button
+                variant="primary"
+                onClick={handleStart}
+                disabled={!device}
+              >
                 <Play size={16} strokeWidth={1.75} />
                 {t("screens.auto.start")}
               </Button>
@@ -222,17 +235,16 @@ export function AutoScreen() {
               value={progressPercent}
               indeterminate={progressIndeterminate}
             />
-            {transfer &&
-              (phase === "downloading" || phase === "uploading") && (
-                <div className="flex items-center justify-between text-xs text-muted">
-                  <span className="min-w-0 truncate font-mono">
-                    {basename(transfer.path)}
-                  </span>
-                  <span className="font-mono">
-                    {Math.round(transfer.percent)}%
-                  </span>
-                </div>
-              )}
+            {transfer && (phase === "downloading" || phase === "uploading") && (
+              <div className="flex items-center justify-between text-xs text-muted">
+                <span className="min-w-0 truncate font-mono">
+                  {basename(transfer.path)}
+                </span>
+                <span className="font-mono">
+                  {Math.round(transfer.percent)}%
+                </span>
+              </div>
+            )}
           </div>
         </Panel>
       )}
@@ -317,7 +329,9 @@ export function AutoScreen() {
                     <span className="flex shrink-0 items-center gap-2 text-xs text-muted">
                       {k.uid && <span>UID {k.uid}</span>}
                       {k.keyType && (
-                        <span>{t("screens.auto.keyType", { type: k.keyType })}</span>
+                        <span>
+                          {t("screens.auto.keyType", { type: k.keyType })}
+                        </span>
                       )}
                     </span>
                   </li>

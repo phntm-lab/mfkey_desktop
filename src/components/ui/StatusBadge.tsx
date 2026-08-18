@@ -1,12 +1,7 @@
 import type { ReactNode } from "react";
 
 export type StatusTone =
-  | "neutral"
-  | "info"
-  | "success"
-  | "warning"
-  | "danger"
-  | "running";
+  "neutral" | "info" | "success" | "warning" | "danger" | "running";
 
 interface StatusBadgeProps {
   tone?: StatusTone;

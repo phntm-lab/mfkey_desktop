@@ -33,10 +33,9 @@ export async function readPersistentSettings(): Promise<PersistentSettings> {
   return result;
 }
 
-export async function writePersistentSetting<K extends keyof PersistentSettings>(
-  key: K,
-  value: PersistentSettings[K],
-): Promise<void> {
+export async function writePersistentSetting<
+  K extends keyof PersistentSettings,
+>(key: K, value: PersistentSettings[K]): Promise<void> {
   if (!isTauri()) {
     memoryState[key] = value;
     return;

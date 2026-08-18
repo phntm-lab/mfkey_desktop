@@ -15,9 +15,7 @@ function isCommandError(value: unknown): value is CommandError {
     return false;
   }
   const record = value as Record<string, unknown>;
-  return (
-    typeof record.code === "string" && typeof record.message === "string"
-  );
+  return typeof record.code === "string" && typeof record.message === "string";
 }
 
 export function toAppError(

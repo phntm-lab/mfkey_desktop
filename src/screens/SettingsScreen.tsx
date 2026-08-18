@@ -18,10 +18,12 @@ export function SettingsScreen() {
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
 
-  const languageOptions: SegmentedOption<Language>[] = LANGUAGES.map((value) => ({
-    value,
-    label: t(`screens.settings.languageOption.${value}`),
-  }));
+  const languageOptions: SegmentedOption<Language>[] = LANGUAGES.map(
+    (value) => ({
+      value,
+      label: t(`screens.settings.languageOption.${value}`),
+    }),
+  );
   const themeOptions: SegmentedOption<Theme>[] = THEMES.map((value) => ({
     value,
     label: t(`screens.settings.themeOption.${value}`),

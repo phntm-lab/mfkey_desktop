@@ -4,11 +4,7 @@ import type { AppError } from "../lib/errors";
 export type TransportKind = "usb" | "ble";
 
 export type ConnectionStatus =
-  | "disconnected"
-  | "scanning"
-  | "connecting"
-  | "connected"
-  | "error";
+  "disconnected" | "scanning" | "connecting" | "connected" | "error";
 
 export interface FlipperDevice {
   id: string;

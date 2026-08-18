@@ -66,7 +66,10 @@ export function useIpcEvents(): void {
       setConnectionError(
         payload.status === "error"
           ? toAppError(
-              { code: payload.code ?? "device", message: payload.message ?? "" },
+              {
+                code: payload.code ?? "device",
+                message: payload.message ?? "",
+              },
               "event",
             )
           : null,

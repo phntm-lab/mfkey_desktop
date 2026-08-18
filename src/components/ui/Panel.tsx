@@ -7,9 +7,16 @@ interface PanelProps {
   className?: string;
 }
 
-export function Panel({ title, actions, children, className = "" }: PanelProps) {
+export function Panel({
+  title,
+  actions,
+  children,
+  className = "",
+}: PanelProps) {
   return (
-    <section className={`rounded-lg border border-line bg-surface ${className}`}>
+    <section
+      className={`rounded-lg border border-line bg-surface ${className}`}
+    >
       {(title || actions) && (
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
           {title && <h2 className="text-sm font-medium text-fg">{title}</h2>}

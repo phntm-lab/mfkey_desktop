@@ -2,13 +2,7 @@ import { create } from "zustand";
 import type { AppError } from "../lib/errors";
 
 export type AttackStatus =
-  | "idle"
-  | "loading"
-  | "running"
-  | "success"
-  | "empty"
-  | "error"
-  | "cancelled";
+  "idle" | "loading" | "running" | "success" | "empty" | "error" | "cancelled";
 
 export type AttackStage = "idle" | "loading" | "running" | "hardnested";
 
