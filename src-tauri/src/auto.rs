@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -7,6 +8,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use tauri::{AppHandle, Emitter, Manager};
 
+use mfkey_core::core::attack_runner::{self, FileAttackOutcome};
+use mfkey_core::core::reporter::Reporter;
 use mfkey_flipper::FlipperSession;
 
 use crate::commands::{AutoRequest, TransportKind};
@@ -15,6 +18,7 @@ use crate::events::{
     AUTO_ERROR, AUTO_STATUS, AutoErrorPayload, AutoStatusPayload, TRANSFER_PROGRESS,
     TransferProgressPayload,
 };
+use crate::reporter::TauriReporter;
 
 const NFC_DIR: &str = "/ext/nfc";
 const AUTO_DIR_PREFIX: &str = "auto-";
@@ -22,6 +26,7 @@ const AUTO_DIR_PREFIX: &str = "auto-";
 const PHASE_CONNECTING: &str = "connecting";
 const PHASE_LISTING: &str = "listing";
 const PHASE_DOWNLOADING: &str = "downloading";
+const PHASE_ATTACKING: &str = "attacking";
 const PHASE_DONE: &str = "done";
 const PHASE_CANCELLED: &str = "cancelled";
 
@@ -102,9 +107,57 @@ fn run_auto_inner(
         return Ok(());
     }
 
-    let _ = &logs.remote;
+    emit_status(app, PHASE_ATTACKING, None);
+    let (all_keys, local_dicts) = run_attacks_over_logs(app, cancel, &logs.local, logs_dir);
+
+    if cancel.load(Ordering::SeqCst) {
+        emit_status(app, PHASE_CANCELLED, None);
+        return Ok(());
+    }
+
+    let _ = (&all_keys, &local_dicts, &logs.remote);
     emit_status(app, PHASE_DONE, None);
     Ok(())
+}
+
+fn run_attacks_over_logs(
+    app: &AppHandle,
+    cancel: &Arc<AtomicBool>,
+    logs: &[PathBuf],
+    logs_dir: &Path,
+) -> (BTreeSet<String>, Vec<PathBuf>) {
+    let mut all_keys: BTreeSet<String> = BTreeSet::new();
+    let mut local_dicts: Vec<PathBuf> = Vec::new();
+
+    let reporter: Arc<dyn Reporter> = Arc::new(TauriReporter::new(app.clone()));
+    let dict_dir = logs_dir.to_string_lossy().to_string();
+
+    for log in logs {
+        if cancel.load(Ordering::SeqCst) {
+            break;
+        }
+
+        let log_str = log.to_string_lossy().to_string();
+        let outcome =
+            match attack_runner::run_file_attack(&reporter, cancel, &log_str, Some(&dict_dir)) {
+                Ok(o) => o,
+                Err(_) => continue,
+            };
+
+        let result = match outcome {
+            FileAttackOutcome::NoUsableNonces => continue,
+            FileAttackOutcome::Ran(r) => r,
+        };
+
+        for k in &result.found_keys {
+            all_keys.insert(k.to_hex().to_uppercase());
+        }
+        for d in &result.dict_outputs {
+            local_dicts.push(PathBuf::from(&d.path));
+        }
+    }
+
+    (all_keys, local_dicts)
 }
 
 fn open_session(transport: TransportKind, device_id: &str) -> mfkey_flipper::Result<FlipperSession> {
