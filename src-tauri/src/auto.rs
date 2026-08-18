@@ -257,7 +257,7 @@ fn merge_and_upload_keys(
             transfer_percent(sent, total),
         );
     })
-    .map_err(|e| CommandError::flipper(&format!("upload {remote_out}"), &e))?;
+    .map_err(|e| CommandError::flipper_session(&format!("upload {remote_out}"), &e))?;
 
     Ok((added as u64, true))
 }
@@ -294,7 +294,7 @@ fn download_target_logs(
 ) -> Result<DownloadedLogs, CommandError> {
     let entries = sess
         .storage_list(NFC_DIR)
-        .map_err(|e| CommandError::flipper(&format!("list {NFC_DIR}"), &e))?;
+        .map_err(|e| CommandError::flipper_session(&format!("list {NFC_DIR}"), &e))?;
 
     let targets: Vec<String> = entries
         .into_iter()
@@ -314,7 +314,7 @@ fn download_target_logs(
         let remote_path = format!("{NFC_DIR}/{name}");
         let data = sess
             .storage_read(&remote_path)
-            .map_err(|e| CommandError::flipper(&format!("read {remote_path}"), &e))?;
+            .map_err(|e| CommandError::flipper_session(&format!("read {remote_path}"), &e))?;
 
         let local_path = logs_dir.join(name);
         std::fs::write(&local_path, &data)

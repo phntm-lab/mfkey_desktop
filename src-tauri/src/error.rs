@@ -60,6 +60,13 @@ impl CommandError {
             message: format!("{context}: {err}"),
         }
     }
+
+    pub fn flipper_session(context: &str, err: &FlipperError) -> Self {
+        Self {
+            code: flipper_session_code(err).to_string(),
+            message: format!("{context}: {err}"),
+        }
+    }
 }
 
 impl From<FlipperError> for CommandError {
@@ -80,6 +87,15 @@ pub fn flipper_code(err: &FlipperError) -> &'static str {
         FlipperError::Timeout => codes::TIMEOUT,
         FlipperError::Protocol(_) => codes::PROTOCOL,
         FlipperError::Ble(message) => ble_code(message),
+    }
+}
+
+pub fn flipper_session_code(err: &FlipperError) -> &'static str {
+    let base = flipper_code(err);
+    if base == codes::IO || base == codes::DEVICE || base == codes::DEVICE_UNREACHABLE {
+        codes::DEVICE_DISCONNECTED
+    } else {
+        base
     }
 }
 
@@ -108,5 +124,64 @@ fn ble_code(message: &str) -> &'static str {
         codes::ACCESS_DENIED
     } else {
         codes::DEVICE
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::ErrorKind;
+
+    #[test]
+    fn ble_hints_map_to_permission_codes() {
+        assert_eq!(
+            ble_code("Bluetooth appears to be off or not ready (0x800710DF)"),
+            codes::BLUETOOTH_OFF
+        );
+        assert_eq!(
+            ble_code("the Flipper is not paired — pair it first"),
+            codes::NOT_PAIRED
+        );
+        assert_eq!(
+            ble_code("no Bluetooth adapter was found on this system"),
+            codes::NO_ADAPTER
+        );
+        assert_eq!(
+            ble_code("access is denied (0x80070005)"),
+            codes::ACCESS_DENIED
+        );
+    }
+
+    #[test]
+    fn unmatched_ble_error_is_generic_device() {
+        assert_eq!(
+            ble_code("BLE transport closed during write"),
+            codes::DEVICE
+        );
+    }
+
+    #[test]
+    fn session_remaps_transport_failures_to_disconnected() {
+        assert_eq!(
+            flipper_session_code(&FlipperError::Ble("BLE transport closed during write".into())),
+            codes::DEVICE_DISCONNECTED
+        );
+        assert_eq!(
+            flipper_session_code(&FlipperError::Io(std::io::Error::from(ErrorKind::BrokenPipe))),
+            codes::DEVICE_DISCONNECTED
+        );
+    }
+
+    #[test]
+    fn session_preserves_specific_codes() {
+        assert_eq!(flipper_session_code(&FlipperError::Timeout), codes::TIMEOUT);
+        assert_eq!(
+            flipper_session_code(&FlipperError::Ble("the device is not paired".into())),
+            codes::NOT_PAIRED
+        );
+        assert_eq!(
+            flipper_session_code(&FlipperError::CommandStatus(3)),
+            codes::PROTOCOL
+        );
     }
 }

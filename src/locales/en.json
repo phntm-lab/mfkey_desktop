@@ -142,7 +142,7 @@
     "protocol": "Unexpected response from the Flipper. Try reconnecting.",
     "device": "A device error occurred.",
     "device_unreachable": "The Flipper could not be reached. Check the connection and try again.",
-    "device_disconnected": "The Flipper was disconnected.",
+    "device_disconnected": "The Flipper was disconnected. Reconnect it and try again.",
     "bluetooth_off": "Bluetooth appears to be off. Turn Bluetooth on and try again.",
     "not_paired": "The Flipper is not paired. Pair it in your system Bluetooth settings first.",
     "no_adapter": "No Bluetooth adapter was found on this system.",

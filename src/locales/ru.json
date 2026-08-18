@@ -142,7 +142,7 @@
     "protocol": "Неожиданный ответ от Flipper. Попробуйте переподключиться.",
     "device": "Ошибка устройства.",
     "device_unreachable": "Не удалось связаться с Flipper. Проверьте соединение и повторите.",
-    "device_disconnected": "Flipper отключён.",
+    "device_disconnected": "Flipper отключён. Переподключите устройство и повторите.",
     "bluetooth_off": "Bluetooth, похоже, выключен. Включите Bluetooth и повторите.",
     "not_paired": "Flipper не сопряжён. Сначала выполните сопряжение в настройках Bluetooth системы.",
     "no_adapter": "Bluetooth-адаптер не найден в системе.",
