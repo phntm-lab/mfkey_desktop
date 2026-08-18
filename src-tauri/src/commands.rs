@@ -333,9 +333,37 @@ fn emit_device_status(
 }
 
 #[tauri::command]
-pub fn start_auto(request: AutoRequest) -> Result<(), CommandError> {
-    let _ = request;
-    Err(CommandError::not_implemented("start_auto"))
+pub fn start_auto(
+    app: AppHandle,
+    state: State<AutoControl>,
+    request: AutoRequest,
+) -> Result<(), CommandError> {
+    if state
+        .running
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .is_err()
+    {
+        return Err(CommandError::already_running());
+    }
+    state.cancel.store(false, Ordering::SeqCst);
+
+    let logs_dir = match crate::auto::prepare_auto_dir(&app) {
+        Ok(dir) => dir,
+        Err(e) => {
+            state.running.store(false, Ordering::SeqCst);
+            return Err(e);
+        }
+    };
+
+    let cancel = Arc::clone(&state.cancel);
+    let running = Arc::clone(&state.running);
+
+    std::thread::spawn(move || {
+        let _guard = RunningGuard(running);
+        crate::auto::run_auto(app, cancel, request, logs_dir);
+    });
+
+    Ok(())
 }
 
 #[tauri::command]

@@ -1,3 +1,4 @@
+mod auto;
 mod commands;
 mod error;
 mod events;

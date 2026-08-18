@@ -8,13 +8,6 @@ pub struct CommandError {
 }
 
 impl CommandError {
-    pub fn not_implemented(command: &str) -> Self {
-        Self {
-            code: "not_implemented".to_string(),
-            message: format!("Command '{command}' is not implemented yet"),
-        }
-    }
-
     pub fn already_running() -> Self {
         Self {
             code: "already_running".to_string(),
