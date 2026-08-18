@@ -44,8 +44,4 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 mfkey-core = { path = "crates/mfkey-core" }
 mfkey-flipper = { path = "crates/mfkey-flipper" }
-tauri-plugin-mcp-bridge = { version = "0.12", optional = true }
-
-[features]
-mcp-bridge = ["dep:tauri-plugin-mcp-bridge"]
 
