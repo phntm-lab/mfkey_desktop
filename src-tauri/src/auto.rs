@@ -2,8 +2,8 @@
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use tauri::{AppHandle, Emitter, Manager};
@@ -16,8 +16,8 @@ use mfkey_flipper::FlipperSession;
 use crate::commands::{AutoRequest, TransportKind};
 use crate::error::CommandError;
 use crate::events::{
-    AUTO_ERROR, AUTO_STATUS, AUTO_SUMMARY, AutoStatusPayload, AutoSummaryPayload, TRANSFER_PROGRESS,
-    TransferProgressPayload,
+    AutoStatusPayload, AutoSummaryPayload, TransferProgressPayload, AUTO_ERROR, AUTO_STATUS,
+    AUTO_SUMMARY, TRANSFER_PROGRESS,
 };
 use crate::reporter::TauriReporter;
 
@@ -251,7 +251,10 @@ fn merge_and_upload_keys(
 
     let remote_out = format!("{ASSETS_DIR}/{RESULT_REMOTE_NAME}");
 
-    let existing = sess.storage_read(&remote_out).ok().filter(|d| !d.is_empty());
+    let existing = sess
+        .storage_read(&remote_out)
+        .ok()
+        .filter(|d| !d.is_empty());
     let had_existing = existing.is_some();
     let existing_keys = existing.as_deref().map(parse_key_lines).unwrap_or_default();
     let (added, final_keys) = merge_key_sets(&existing_keys, all_keys);
@@ -294,7 +297,10 @@ fn transfer_percent(sent: usize, total: usize) -> f32 {
     }
 }
 
-fn open_session(transport: TransportKind, device_id: &str) -> mfkey_flipper::Result<FlipperSession> {
+fn open_session(
+    transport: TransportKind,
+    device_id: &str,
+) -> mfkey_flipper::Result<FlipperSession> {
     match transport {
         TransportKind::Usb => FlipperSession::open(device_id),
         TransportKind::Ble => {

@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
@@ -14,8 +14,8 @@ use mfkey_core::core::reporter::Reporter;
 
 use crate::error::CommandError;
 use crate::events::{
-    ATTACK_ERROR, ATTACK_SUMMARY, AttackSummaryPayload, DEVICE_STATUS, DeviceStatusPayload,
-    DictOutputPayload,
+    AttackSummaryPayload, DeviceStatusPayload, DictOutputPayload, ATTACK_ERROR, ATTACK_SUMMARY,
+    DEVICE_STATUS,
 };
 use crate::reporter::TauriReporter;
 
@@ -292,13 +292,7 @@ pub fn connect_flipper(app: AppHandle, request: ConnectRequest) -> Result<(), Co
         device_id,
     } = request;
 
-    emit_device_status(
-        &app,
-        "connecting",
-        Some(&device_id),
-        Some(transport),
-        None,
-    );
+    emit_device_status(&app, "connecting", Some(&device_id), Some(transport), None);
 
     std::thread::spawn(move || match probe_device(transport, &device_id) {
         Ok(()) => emit_device_status(&app, "connected", Some(&device_id), Some(transport), None),

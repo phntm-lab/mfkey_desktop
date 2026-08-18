@@ -10,8 +10,8 @@ use mfkey_core::core::reporter::Reporter;
 
 use crate::error::CommandError;
 use crate::events::{
-    ATTACK_ERROR, ATTACK_FOUND_KEY, ATTACK_HARDNESTED, ATTACK_PROGRESS, AttackProgressPayload,
-    FoundKeyPayload, HardNestedPayload,
+    AttackProgressPayload, FoundKeyPayload, HardNestedPayload, ATTACK_ERROR, ATTACK_FOUND_KEY,
+    ATTACK_HARDNESTED, ATTACK_PROGRESS,
 };
 
 const PROGRESS_THROTTLE: Duration = Duration::from_millis(40);

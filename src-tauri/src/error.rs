@@ -154,20 +154,21 @@ mod tests {
 
     #[test]
     fn unmatched_ble_error_is_generic_device() {
-        assert_eq!(
-            ble_code("BLE transport closed during write"),
-            codes::DEVICE
-        );
+        assert_eq!(ble_code("BLE transport closed during write"), codes::DEVICE);
     }
 
     #[test]
     fn session_remaps_transport_failures_to_disconnected() {
         assert_eq!(
-            flipper_session_code(&FlipperError::Ble("BLE transport closed during write".into())),
+            flipper_session_code(&FlipperError::Ble(
+                "BLE transport closed during write".into()
+            )),
             codes::DEVICE_DISCONNECTED
         );
         assert_eq!(
-            flipper_session_code(&FlipperError::Io(std::io::Error::from(ErrorKind::BrokenPipe))),
+            flipper_session_code(&FlipperError::Io(std::io::Error::from(
+                ErrorKind::BrokenPipe
+            ))),
             codes::DEVICE_DISCONNECTED
         );
     }
