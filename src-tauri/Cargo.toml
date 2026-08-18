@@ -9,9 +9,15 @@ authors = ["Lemn4t"]
 license = "GPL-3.0-only"
 repository = "https://github.com/phntm-lab/mfkey_desktop"
 
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+panic = "unwind"
+
 [package]
 name = "mfkey_desktop"
-version = "0.1.0"
+version = "1.0.0"
 description = "Recover MIFARE Classic keys from Flipper Zero nonce logs."
 authors = ["Lemn4t"]
 license = "GPL-3.0-only"
