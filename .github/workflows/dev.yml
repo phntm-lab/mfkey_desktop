@@ -1,0 +1,145 @@
+name: Build dev
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: build-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  bundle:
+    name: Bundle (${{ matrix.label }})
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      endsWith(github.event.head_commit.message, '[build]')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            label: macOS-AppleSilicon
+            bundle_path: src-tauri/target/aarch64-apple-darwin/release/bundle
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            label: macOS-Intel
+            bundle_path: src-tauri/target/x86_64-apple-darwin/release/bundle
+          - os: ubuntu-22.04
+            target: ""
+            label: Linux
+            bundle_path: src-tauri/target/release/bundle
+          - os: windows-latest
+            target: ""
+            label: Windows
+            bundle_path: src-tauri/target/release/bundle
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Linux build dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev \
+            libudev-dev \
+            libdbus-1-dev \
+            pkg-config \
+            build-essential \
+            patchelf \
+            file \
+            rpm
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ${{ matrix.label }}
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Read app version
+        id: version
+        shell: bash
+        run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build the app bundles
+        shell: bash
+        run: |
+          if [ -n "${{ matrix.target }}" ]; then
+            bun run tauri build --target ${{ matrix.target }}
+          else
+            bun run tauri build
+          fi
+
+      - name: Upload Setup EXE (Windows)
+        if: matrix.label == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_Windows_setup
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/nsis/*.exe
+
+      - name: Upload MSI (Windows)
+        if: matrix.label == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_Windows_msi
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/msi/*.msi
+
+      - name: Upload DEB (Linux)
+        if: matrix.label == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_Linux_deb
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/deb/*.deb
+
+      - name: Upload RPM (Linux)
+        if: matrix.label == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_Linux_rpm
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/rpm/*.rpm
+
+      - name: Upload AppImage (Linux)
+        if: matrix.label == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_Linux_AppImage
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/appimage/*.AppImage
+
+      - name: Upload DMG (macOS Apple Silicon)
+        if: matrix.label == 'macOS-AppleSilicon'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_macOS-AppleSilicon_dmg
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/dmg/*.dmg
+
+      - name: Upload DMG (macOS Intel)
+        if: matrix.label == 'macOS-Intel'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop_v${{ steps.version.outputs.APP_VERSION }}_macOS-Intel_dmg
+          if-no-files-found: error
+          path: ${{ matrix.bundle_path }}/dmg/*.dmg
