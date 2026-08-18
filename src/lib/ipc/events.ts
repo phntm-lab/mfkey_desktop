@@ -50,6 +50,8 @@ export interface AutoSummaryPayload {
   uploadedDicts: number;
   keysAdded: number;
   keysUploaded: boolean;
+  logsTotal: number;
+  logsSkipped: number;
 }
 
 export interface EventPayloadMap {

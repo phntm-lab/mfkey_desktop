@@ -89,6 +89,8 @@
       "foundKeysLabel": "Найдено ключей",
       "uploadedDictsLabel": "Загружено словарей",
       "keysAddedLabel": "Добавлено ключей",
+      "logsProcessedLabel": "Обработано логов",
+      "logsSkipped": "Пропущено логов: {{count}} — нет пригодных nonce.",
       "dictUploaded": "Пользовательский словарь на Flipper обновлён.",
       "dictUnchanged": "Пользовательский словарь уже актуален; загрузка не требуется.",
       "noKeys": "Ключи не восстановлены",

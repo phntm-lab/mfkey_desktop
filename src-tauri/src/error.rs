@@ -173,6 +173,11 @@ mod tests {
     }
 
     #[test]
+    fn transport_timeout_surfaces_timeout_code() {
+        assert_eq!(flipper_code(&FlipperError::Timeout), codes::TIMEOUT);
+    }
+
+    #[test]
     fn session_preserves_specific_codes() {
         assert_eq!(flipper_session_code(&FlipperError::Timeout), codes::TIMEOUT);
         assert_eq!(

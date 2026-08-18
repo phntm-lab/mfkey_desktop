@@ -89,6 +89,8 @@
       "foundKeysLabel": "Found keys",
       "uploadedDictsLabel": "Uploaded dictionaries",
       "keysAddedLabel": "New keys merged",
+      "logsProcessedLabel": "Logs processed",
+      "logsSkipped": "{{count}} log(s) skipped — no usable nonces.",
       "dictUploaded": "User dictionary updated on the Flipper.",
       "dictUnchanged": "User dictionary already up to date; nothing uploaded.",
       "noKeys": "No keys recovered",

@@ -281,7 +281,21 @@ export function AutoScreen() {
                   {summary?.keysAdded ?? 0}
                 </span>
               </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-muted">
+                  {t("screens.auto.logsProcessedLabel")}
+                </span>
+                <span className="font-mono text-fg">
+                  {summary?.logsTotal ?? 0}
+                </span>
+              </div>
             </div>
+
+            {summary && summary.logsSkipped > 0 && (
+              <p className="text-xs text-muted">
+                {t("screens.auto.logsSkipped", { count: summary.logsSkipped })}
+              </p>
+            )}
 
             {summary && (
               <p className="flex items-center gap-2 text-xs text-muted">

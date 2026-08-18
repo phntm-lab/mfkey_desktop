@@ -25,6 +25,8 @@ export interface AutoSummary {
   uploadedDicts: number;
   keysAdded: number;
   keysUploaded: boolean;
+  logsTotal: number;
+  logsSkipped: number;
 }
 
 const activePhases: ReadonlySet<AutoPhase> = new Set<AutoPhase>([

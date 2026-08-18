@@ -39,6 +39,12 @@ struct DownloadedLogs {
     remote: Vec<String>,
 }
 
+struct AttackRunResult {
+    keys: BTreeSet<String>,
+    dicts: Vec<PathBuf>,
+    skipped: u64,
+}
+
 fn is_target_log(name: &str) -> bool {
     let lower = name.to_lowercase();
     lower.ends_with(".mfkey32.log") || lower.ends_with(".nested.log")
@@ -112,7 +118,7 @@ fn run_auto_inner(
     }
 
     emit_status(app, PHASE_ATTACKING, None);
-    let (all_keys, local_dicts) = run_attacks_over_logs(app, cancel, &logs.local, logs_dir);
+    let run = run_attacks_over_logs(app, cancel, &logs.local, logs_dir);
 
     if cancel.load(Ordering::SeqCst) {
         emit_status(app, PHASE_CANCELLED, None);
@@ -120,20 +126,21 @@ fn run_auto_inner(
     }
 
     emit_status(app, PHASE_UPLOADING, None);
-    let uploaded_dicts = upload_dicts(app, &mut sess, &local_dicts);
-    let (keys_added, keys_uploaded) =
-        merge_and_upload_keys(app, &mut sess, &all_keys, logs_dir)?;
+    let uploaded_dicts = upload_dicts(app, &mut sess, &run.dicts);
+    let (keys_added, keys_uploaded) = merge_and_upload_keys(app, &mut sess, &run.keys, logs_dir)?;
 
-    if request.delete_logs_after && !all_keys.is_empty() {
+    if request.delete_logs_after && !run.keys.is_empty() {
         delete_remote_logs(&mut sess, &logs.remote);
     }
 
     emit_summary(
         app,
-        all_keys.len() as u64,
+        run.keys.len() as u64,
         uploaded_dicts,
         keys_added,
         keys_uploaded,
+        logs.local.len() as u64,
+        run.skipped,
     );
     emit_status(app, PHASE_DONE, None);
     Ok(())
@@ -144,9 +151,10 @@ fn run_attacks_over_logs(
     cancel: &Arc<AtomicBool>,
     logs: &[PathBuf],
     logs_dir: &Path,
-) -> (BTreeSet<String>, Vec<PathBuf>) {
-    let mut all_keys: BTreeSet<String> = BTreeSet::new();
-    let mut local_dicts: Vec<PathBuf> = Vec::new();
+) -> AttackRunResult {
+    let mut keys: BTreeSet<String> = BTreeSet::new();
+    let mut dicts: Vec<PathBuf> = Vec::new();
+    let mut skipped = 0u64;
 
     let reporter: Arc<dyn Reporter> = Arc::new(TauriReporter::new(app.clone()));
     let dict_dir = logs_dir.to_string_lossy().to_string();
@@ -160,23 +168,33 @@ fn run_attacks_over_logs(
         let outcome =
             match attack_runner::run_file_attack(&reporter, cancel, &log_str, Some(&dict_dir)) {
                 Ok(o) => o,
-                Err(_) => continue,
+                Err(_) => {
+                    skipped += 1;
+                    continue;
+                }
             };
 
         let result = match outcome {
-            FileAttackOutcome::NoUsableNonces => continue,
+            FileAttackOutcome::NoUsableNonces => {
+                skipped += 1;
+                continue;
+            }
             FileAttackOutcome::Ran(r) => r,
         };
 
         for k in &result.found_keys {
-            all_keys.insert(k.to_hex().to_uppercase());
+            keys.insert(k.to_hex().to_uppercase());
         }
         for d in &result.dict_outputs {
-            local_dicts.push(PathBuf::from(&d.path));
+            dicts.push(PathBuf::from(&d.path));
         }
     }
 
-    (all_keys, local_dicts)
+    AttackRunResult {
+        keys,
+        dicts,
+        skipped,
+    }
 }
 
 fn upload_dicts(app: &AppHandle, sess: &mut FlipperSession, local_dicts: &[PathBuf]) -> u64 {
@@ -344,12 +362,16 @@ fn emit_summary(
     uploaded_dicts: u64,
     keys_added: u64,
     keys_uploaded: bool,
+    logs_total: u64,
+    logs_skipped: u64,
 ) {
     let payload = AutoSummaryPayload {
         found_keys,
         uploaded_dicts,
         keys_added,
         keys_uploaded,
+        logs_total,
+        logs_skipped,
     };
     let _ = app.emit(AUTO_SUMMARY, payload);
 }

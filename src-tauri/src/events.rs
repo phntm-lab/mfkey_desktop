@@ -88,4 +88,6 @@ pub struct AutoSummaryPayload {
     pub uploaded_dicts: u64,
     pub keys_added: u64,
     pub keys_uploaded: bool,
+    pub logs_total: u64,
+    pub logs_skipped: u64,
 }

@@ -169,6 +169,8 @@ export function useIpcEvents(): void {
         uploadedDicts: payload.uploadedDicts,
         keysAdded: payload.keysAdded,
         keysUploaded: payload.keysUploaded,
+        logsTotal: payload.logsTotal,
+        logsSkipped: payload.logsSkipped,
       });
     },
     [setAutoSummary],
