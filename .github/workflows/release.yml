@@ -16,25 +16,29 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  publish:
-    name: Publish (${{ matrix.label }})
+  build:
+    name: Build (${{ matrix.label }})
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-latest
+            osName: macOS
             target: aarch64-apple-darwin
             args: "--target aarch64-apple-darwin"
             label: macOS-AppleSilicon
           - os: macos-latest
+            osName: macOS
             target: x86_64-apple-darwin
             args: "--target x86_64-apple-darwin"
             label: macOS-Intel
           - os: ubuntu-22.04
+            osName: Linux
             target: ""
             args: ""
             label: Linux
           - os: windows-latest
+            osName: Windows
             target: ""
             args: ""
             label: Windows
@@ -75,34 +79,82 @@ jobs:
       - name: Install frontend dependencies
         run: bun install --frozen-lockfile
 
-      - name: Extract release notes from changelog
-        id: changelog
+      - uses: tauri-apps/tauri-action@v1
+        id: tauri
+        with:
+          args: ${{ matrix.args }}
+
+      - name: Collect bundles with OS-labeled names
         shell: bash
         run: |
           VERSION=$(jq -r .version src-tauri/tauri.conf.json)
-          BODY=$(awk -v ver="$VERSION" '
+          mkdir -p dist
+          echo '${{ steps.tauri.outputs.artifactPaths }}' | jq -r '.[]' | while read -r f; do
+            [ -z "$f" ] && continue
+            [ -d "$f" ] && continue
+            base=$(basename "$f")
+            case "$base" in
+              *.exe | *.msi | *.deb | *.rpm | *.AppImage | *.dmg | *.app.tar.gz)
+                rest="${base#MFKey Desktop[_-]$VERSION[_-]}"
+                rest="${rest// /-}"
+                cp "$f" "dist/MFKey-Desktop_${VERSION}_${{ matrix.osName }}_${rest}"
+                ;;
+            esac
+          done
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop-${{ matrix.label }}
+          if-no-files-found: error
+          path: dist/*
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read app version
+        id: version
+        shell: bash
+        run: echo "version=$(jq -r .version src-tauri/tauri.conf.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Extract release notes from changelog
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          awk -v ver="$VERSION" '
             /^##[[:space:]]/ {
               if (capture == 1) { exit }
               if (index($0, ver) > 0) { capture = 1; next }
             }
             capture == 1 { print }
-          ' CHANGELOG.md)
-          if [ -z "$BODY" ]; then
-            BODY="See the assets to download and install this version."
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "See the assets to download and install this version." > RELEASE_NOTES.md
           fi
-          {
-            echo "body<<CHANGELOG_EOF"
-            echo "$BODY"
-            echo "CHANGELOG_EOF"
-          } >> "$GITHUB_OUTPUT"
+          cat RELEASE_NOTES.md
 
-      - uses: tauri-apps/tauri-action@v1
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts
+        shell: bash
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec cp {} release/ \;
+          ls -la release
+
+      - uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__
-          releaseName: "MFKey Desktop v__VERSION__"
-          releaseBody: ${{ steps.changelog.outputs.body }}
-          releaseDraft: false
+          tag_name: v${{ steps.version.outputs.version }}
+          name: MFKey Desktop v${{ steps.version.outputs.version }}
+          files: release/*
+          body_path: RELEASE_NOTES.md
+          draft: false
           prerelease: false
-          args: ${{ matrix.args }}

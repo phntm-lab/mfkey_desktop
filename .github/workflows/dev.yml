@@ -23,18 +23,22 @@ jobs:
       matrix:
         include:
           - os: macos-latest
+            osName: macOS
             target: aarch64-apple-darwin
             args: "--target aarch64-apple-darwin"
             label: macOS-AppleSilicon
           - os: macos-latest
+            osName: macOS
             target: x86_64-apple-darwin
             args: "--target x86_64-apple-darwin"
             label: macOS-Intel
           - os: ubuntu-22.04
+            osName: Linux
             target: ""
             args: ""
             label: Linux
           - os: windows-latest
+            osName: Windows
             target: ""
             args: ""
             label: Windows
@@ -76,9 +80,31 @@ jobs:
         run: bun install --frozen-lockfile
 
       - uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: tauri
         with:
           args: ${{ matrix.args }}
-          uploadWorkflowArtifacts: true
-          workflowArtifactNamePattern: "MFKey-Desktop-[platform]-[arch]-[bundle]"
+
+      - name: Collect bundles with OS-labeled names
+        shell: bash
+        run: |
+          VERSION=$(jq -r .version src-tauri/tauri.conf.json)
+          mkdir -p dist
+          echo '${{ steps.tauri.outputs.artifactPaths }}' | jq -r '.[]' | while read -r f; do
+            [ -z "$f" ] && continue
+            [ -d "$f" ] && continue
+            base=$(basename "$f")
+            case "$base" in
+              *.exe | *.msi | *.deb | *.rpm | *.AppImage | *.dmg | *.app.tar.gz)
+                rest="${base#MFKey Desktop[_-]$VERSION[_-]}"
+                rest="${rest// /-}"
+                cp "$f" "dist/MFKey-Desktop_${VERSION}_${{ matrix.osName }}_${rest}"
+                ;;
+            esac
+          done
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MFKey-Desktop-${{ matrix.label }}
+          if-no-files-found: error
+          path: dist/*
