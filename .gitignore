@@ -25,5 +25,8 @@ dist-ssr
 
 .claude
 
+.mcp.json
+src-tauri/tauri.mcp.conf.json
+
 !src-tauri/examples/
 !src-tauri/examples/**
