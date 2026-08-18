@@ -27,7 +27,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis", "msi", "deb", "appimage", "rpm", "app", "dmg"],
     "category": "Utility",
     "shortDescription": "Recover MIFARE Classic keys from Flipper Zero logs.",
     "longDescription": "MFKey Desktop recovers MIFARE Classic (Crypto-1) keys from Flipper Zero nonce logs. It supports offline log files and a live Auto mode that communicates with a Flipper Zero over USB or BLE.",
