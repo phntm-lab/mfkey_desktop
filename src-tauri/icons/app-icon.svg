@@ -1,0 +1,22 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tile" x1="512" y1="0" x2="512" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#17171a"/>
+      <stop offset="1" stop-color="#0a0a0b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="475" y1="320" x2="475" y2="740" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffb24d"/>
+      <stop offset="1" stop-color="#ff8200"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="1016" height="1016" rx="224" fill="url(#tile)"/>
+  <rect x="5" y="5" width="1014" height="1014" rx="223" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="2"/>
+  <g stroke="url(#accent)" stroke-linecap="round" fill="none">
+    <path d="M622.8 270.9 A240 240 0 0 1 622.8 649.1" stroke-width="46"/>
+    <path d="M672 207.8 A320 320 0 0 1 672 712.2" stroke-width="42" stroke-opacity="0.72"/>
+  </g>
+  <g fill="url(#accent)">
+    <circle cx="475" cy="460" r="132"/>
+    <path d="M475 485 L530 720 L420 720 Z"/>
+  </g>
+</svg>
