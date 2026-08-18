@@ -21,6 +21,8 @@
       "noncesLabel": "Обработано nonce",
       "resultsTitle": "Результаты",
       "errorTitle": "Ошибка",
+      "emptyTitle": "Нет пригодных nonce",
+      "emptyBody": "В выбранном файле нет пригодных nonce. Соберите новые логи на Flipper и повторите.",
       "export": "Экспорт",
       "exportedTo": "Сохранено в {{path}}",
       "foundKeysLabel": "Найдено ключей",
@@ -42,6 +44,7 @@
         "loading": "Загрузка",
         "running": "Выполняется",
         "success": "Завершено",
+        "empty": "Пусто",
         "cancelled": "Отменено",
         "error": "Ошибка"
       }

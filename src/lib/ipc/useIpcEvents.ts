@@ -129,7 +129,7 @@ export function useIpcEvents(): void {
         candidateKeys: payload.candidateKeys,
         foundKeys: payload.foundKeys,
       });
-      setStatus(payload.status === "success" ? "success" : "cancelled");
+      setStatus(payload.status);
       setCancelRequested(false);
       markFinished(Date.now());
     },

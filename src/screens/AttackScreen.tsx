@@ -6,6 +6,7 @@ import {
   Download,
   FileSearch,
   FileText,
+  Inbox,
   Play,
   Square,
 } from "lucide-react";
@@ -37,6 +38,7 @@ const STATUS_TONE: Record<AttackStatus, StatusTone> = {
   loading: "info",
   running: "running",
   success: "success",
+  empty: "neutral",
   cancelled: "warning",
   error: "danger",
 };
@@ -241,7 +243,7 @@ export function AttackScreen() {
         </div>
       </Panel>
 
-      {status !== "idle" && (
+      {status !== "idle" && status !== "empty" && (
         <Panel title={t("screens.attack.progressTitle")}>
           <div className="flex flex-col gap-3">
             <ProgressBar
@@ -273,6 +275,17 @@ export function AttackScreen() {
                 </p>
               )}
             </div>
+          </div>
+        </Panel>
+      )}
+
+      {status === "empty" && (
+        <Panel title={t("screens.attack.emptyTitle")}>
+          <div className="flex items-start gap-3 text-sm text-muted">
+            <Inbox size={18} strokeWidth={1.75} className="shrink-0" />
+            <p className="min-w-0 break-words">
+              {t("screens.attack.emptyBody")}
+            </p>
           </div>
         </Panel>
       )}

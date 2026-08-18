@@ -6,6 +6,7 @@ export type AttackStatus =
   | "loading"
   | "running"
   | "success"
+  | "empty"
   | "error"
   | "cancelled";
 

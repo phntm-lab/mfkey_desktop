@@ -12,7 +12,7 @@ import type {
 import type { AutoPhase } from "../../store/useAutoStore";
 import type { CommandError } from "./commands";
 
-export type AttackCompletionStatus = "success" | "cancelled";
+export type AttackCompletionStatus = "success" | "cancelled" | "empty";
 
 export interface AttackSummaryPayload {
   foundKeys: number;

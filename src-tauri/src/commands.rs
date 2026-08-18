@@ -12,7 +12,7 @@ use tauri_plugin_dialog::DialogExt;
 use mfkey_core::core::attack_runner::{self, FileAttackOutcome};
 use mfkey_core::core::reporter::Reporter;
 
-use crate::error::{CommandError, codes};
+use crate::error::CommandError;
 use crate::events::{
     ATTACK_ERROR, ATTACK_SUMMARY, AttackSummaryPayload, DEVICE_STATUS, DeviceStatusPayload,
     DictOutputPayload,
@@ -139,13 +139,18 @@ pub fn start_file_attack(
                 let _ = app.emit(ATTACK_SUMMARY, payload);
             }
             Ok(FileAttackOutcome::NoUsableNonces) => {
-                emit_error(
-                    &app,
-                    &CommandError::new(
-                        codes::NO_USABLE_NONCES,
-                        "No usable nonces found in the selected file",
-                    ),
-                );
+                let status = if cancel.load(Ordering::SeqCst) {
+                    "cancelled"
+                } else {
+                    "empty"
+                };
+                let payload = AttackSummaryPayload {
+                    found_keys: 0,
+                    candidate_keys: 0,
+                    dict_outputs: Vec::new(),
+                    status: status.to_string(),
+                };
+                let _ = app.emit(ATTACK_SUMMARY, payload);
             }
             Err(e) => {
                 emit_error(

@@ -21,6 +21,8 @@
       "noncesLabel": "Nonces processed",
       "resultsTitle": "Results",
       "errorTitle": "Error",
+      "emptyTitle": "No usable nonces",
+      "emptyBody": "The selected file contains no usable nonces. Capture new logs on the Flipper and try again.",
       "export": "Export",
       "exportedTo": "Saved to {{path}}",
       "foundKeysLabel": "Found keys",
@@ -42,6 +44,7 @@
         "loading": "Loading",
         "running": "Running",
         "success": "Completed",
+        "empty": "Empty",
         "cancelled": "Cancelled",
         "error": "Error"
       }
