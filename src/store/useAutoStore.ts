@@ -18,6 +18,13 @@ export interface AutoTransfer {
   percent: number;
 }
 
+export interface AutoSummary {
+  foundKeys: number;
+  uploadedDicts: number;
+  keysAdded: number;
+  keysUploaded: boolean;
+}
+
 const activePhases: ReadonlySet<AutoPhase> = new Set<AutoPhase>([
   "connecting",
   "listing",
@@ -30,6 +37,7 @@ interface AutoState {
   phase: AutoPhase;
   message: string | null;
   transfer: AutoTransfer | null;
+  summary: AutoSummary | null;
   cancelRequested: boolean;
   error: string | null;
   startedAt: number | null;
@@ -37,6 +45,7 @@ interface AutoState {
   running: () => boolean;
   setPhase: (phase: AutoPhase, message?: string | null) => void;
   setTransfer: (transfer: AutoTransfer | null) => void;
+  setSummary: (summary: AutoSummary | null) => void;
   setCancelRequested: (requested: boolean) => void;
   setError: (error: string | null) => void;
   markStarted: (at: number) => void;
@@ -48,6 +57,7 @@ const initialState = {
   phase: "idle" as AutoPhase,
   message: null,
   transfer: null,
+  summary: null,
   cancelRequested: false,
   error: null,
   startedAt: null,
@@ -63,6 +73,7 @@ export const useAutoStore = create<AutoState>((set, get) => ({
   running: () => isAutoActive(get().phase),
   setPhase: (phase, message = null) => set({ phase, message }),
   setTransfer: (transfer) => set({ transfer }),
+  setSummary: (summary) => set({ summary }),
   setCancelRequested: (cancelRequested) => set({ cancelRequested }),
   setError: (error) => set({ error }),
   markStarted: (at) => set({ startedAt: at, finishedAt: null }),

@@ -12,6 +12,7 @@ pub const ATTACK_ERROR: &str = "attack://error";
 pub const DEVICE_STATUS: &str = "device://status";
 pub const TRANSFER_PROGRESS: &str = "transfer://progress";
 pub const AUTO_STATUS: &str = "auto://status";
+pub const AUTO_SUMMARY: &str = "auto://summary";
 pub const AUTO_ERROR: &str = "auto://error";
 
 #[derive(Debug, Clone, Serialize)]
@@ -84,6 +85,15 @@ pub struct TransferProgressPayload {
 pub struct AutoStatusPayload {
     pub phase: String,
     pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AutoSummaryPayload {
+    pub found_keys: u64,
+    pub uploaded_dicts: u64,
+    pub keys_added: u64,
+    pub keys_uploaded: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]

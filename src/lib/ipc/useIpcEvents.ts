@@ -52,6 +52,7 @@ export function useIpcEvents(): void {
   const setConnectionError = useConnectionStore((s) => s.setError);
   const setAutoPhase = useAutoStore((s) => s.setPhase);
   const setAutoTransfer = useAutoStore((s) => s.setTransfer);
+  const setAutoSummary = useAutoStore((s) => s.setSummary);
   const setAutoCancelRequested = useAutoStore((s) => s.setCancelRequested);
   const setAutoError = useAutoStore((s) => s.setError);
   const markAutoFinished = useAutoStore((s) => s.markFinished);
@@ -122,6 +123,18 @@ export function useIpcEvents(): void {
     [setAutoPhase, setAutoCancelRequested, markAutoFinished],
   );
 
+  const handleAutoSummary = useCallback(
+    (payload: EventPayloadMap["auto://summary"]) => {
+      setAutoSummary({
+        foundKeys: payload.foundKeys,
+        uploadedDicts: payload.uploadedDicts,
+        keysAdded: payload.keysAdded,
+        keysUploaded: payload.keysUploaded,
+      });
+    },
+    [setAutoSummary],
+  );
+
   const handleAutoError = useCallback(
     (payload: EventPayloadMap["auto://error"]) => {
       setAutoError(payload.message);
@@ -153,6 +166,7 @@ export function useIpcEvents(): void {
   useTauriEvent("attack://error", handleError);
   useTauriEvent("device://status", handleDeviceStatus);
   useTauriEvent("auto://status", handleAutoStatus);
+  useTauriEvent("auto://summary", handleAutoSummary);
   useTauriEvent("auto://error", handleAutoError);
   useTauriEvent("transfer://progress", handleTransfer);
 }

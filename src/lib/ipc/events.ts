@@ -44,6 +44,13 @@ export interface AutoStatusPayload {
   message?: string;
 }
 
+export interface AutoSummaryPayload {
+  foundKeys: number;
+  uploadedDicts: number;
+  keysAdded: number;
+  keysUploaded: boolean;
+}
+
 export interface AutoErrorPayload {
   code: string;
   message: string;
@@ -58,6 +65,7 @@ export interface EventPayloadMap {
   "device://status": DeviceStatusPayload;
   "transfer://progress": TransferProgressPayload;
   "auto://status": AutoStatusPayload;
+  "auto://summary": AutoSummaryPayload;
   "auto://error": AutoErrorPayload;
 }
 
@@ -72,6 +80,7 @@ export const EVENTS = {
   deviceStatus: "device://status",
   transferProgress: "transfer://progress",
   autoStatus: "auto://status",
+  autoSummary: "auto://summary",
   autoError: "auto://error",
 } as const;
 

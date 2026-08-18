@@ -9,24 +9,28 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::{AppHandle, Emitter, Manager};
 
 use mfkey_core::core::attack_runner::{self, FileAttackOutcome};
+use mfkey_core::core::keys::{merge_key_sets, parse_key_lines};
 use mfkey_core::core::reporter::Reporter;
 use mfkey_flipper::FlipperSession;
 
 use crate::commands::{AutoRequest, TransportKind};
 use crate::error::CommandError;
 use crate::events::{
-    AUTO_ERROR, AUTO_STATUS, AutoErrorPayload, AutoStatusPayload, TRANSFER_PROGRESS,
-    TransferProgressPayload,
+    AUTO_ERROR, AUTO_STATUS, AUTO_SUMMARY, AutoErrorPayload, AutoStatusPayload, AutoSummaryPayload,
+    TRANSFER_PROGRESS, TransferProgressPayload,
 };
 use crate::reporter::TauriReporter;
 
 const NFC_DIR: &str = "/ext/nfc";
+const ASSETS_DIR: &str = "/ext/nfc/assets";
+const RESULT_REMOTE_NAME: &str = "mf_classic_dict_user.nfc";
 const AUTO_DIR_PREFIX: &str = "auto-";
 
 const PHASE_CONNECTING: &str = "connecting";
 const PHASE_LISTING: &str = "listing";
 const PHASE_DOWNLOADING: &str = "downloading";
 const PHASE_ATTACKING: &str = "attacking";
+const PHASE_UPLOADING: &str = "uploading";
 const PHASE_DONE: &str = "done";
 const PHASE_CANCELLED: &str = "cancelled";
 
@@ -115,7 +119,20 @@ fn run_auto_inner(
         return Ok(());
     }
 
-    let _ = (&all_keys, &local_dicts, &logs.remote);
+    emit_status(app, PHASE_UPLOADING, None);
+    let uploaded_dicts = upload_dicts(app, &mut sess, &local_dicts);
+    let (keys_added, keys_uploaded) =
+        merge_and_upload_keys(app, &mut sess, &all_keys, logs_dir)?;
+
+    let _ = &logs.remote;
+
+    emit_summary(
+        app,
+        all_keys.len() as u64,
+        uploaded_dicts,
+        keys_added,
+        keys_uploaded,
+    );
     emit_status(app, PHASE_DONE, None);
     Ok(())
 }
@@ -158,6 +175,97 @@ fn run_attacks_over_logs(
     }
 
     (all_keys, local_dicts)
+}
+
+fn upload_dicts(app: &AppHandle, sess: &mut FlipperSession, local_dicts: &[PathBuf]) -> u64 {
+    if local_dicts.is_empty() {
+        return 0;
+    }
+
+    let mut dicts = local_dicts.to_vec();
+    dicts.sort();
+    dicts.dedup();
+
+    let mut uploaded = 0u64;
+    for dict_path in &dicts {
+        let Some(file_name) = dict_path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        let Ok(data) = std::fs::read(dict_path) else {
+            continue;
+        };
+
+        let remote_dict = format!("{ASSETS_DIR}/{file_name}");
+        let res = sess.upload_file(&remote_dict, &data, |sent, total| {
+            emit_transfer(
+                app,
+                &remote_dict,
+                sent as u64,
+                total as u64,
+                transfer_percent(sent, total),
+            );
+        });
+        if res.is_ok() {
+            uploaded += 1;
+        }
+    }
+
+    uploaded
+}
+
+fn merge_and_upload_keys(
+    app: &AppHandle,
+    sess: &mut FlipperSession,
+    all_keys: &BTreeSet<String>,
+    logs_dir: &Path,
+) -> Result<(u64, bool), String> {
+    if all_keys.is_empty() {
+        return Ok((0, false));
+    }
+
+    let result_path = logs_dir.join(RESULT_REMOTE_NAME);
+    let mut local_body = all_keys.iter().cloned().collect::<Vec<_>>().join("\n");
+    local_body.push('\n');
+    std::fs::write(&result_path, local_body.as_bytes())
+        .map_err(|e| format!("write {result_path:?}: {e}"))?;
+
+    let remote_out = format!("{ASSETS_DIR}/{RESULT_REMOTE_NAME}");
+
+    let existing = sess.storage_read(&remote_out).ok().filter(|d| !d.is_empty());
+    let had_existing = existing.is_some();
+    let existing_keys = existing.as_deref().map(parse_key_lines).unwrap_or_default();
+    let (added, final_keys) = merge_key_sets(&existing_keys, all_keys);
+
+    if had_existing && added == 0 {
+        return Ok((0, false));
+    }
+
+    let mut body = final_keys.into_iter().collect::<Vec<_>>().join("\n");
+    body.push('\n');
+    let upload = body.into_bytes();
+
+    let _ = std::fs::write(&result_path, &upload);
+
+    sess.upload_file(&remote_out, &upload, |sent, total| {
+        emit_transfer(
+            app,
+            &remote_out,
+            sent as u64,
+            total as u64,
+            transfer_percent(sent, total),
+        );
+    })
+    .map_err(|e| format!("upload {remote_out}: {e}"))?;
+
+    Ok((added as u64, true))
+}
+
+fn transfer_percent(sent: usize, total: usize) -> f32 {
+    if total == 0 {
+        100.0
+    } else {
+        (sent as f32 / total as f32) * 100.0
+    }
 }
 
 fn open_session(transport: TransportKind, device_id: &str) -> mfkey_flipper::Result<FlipperSession> {
@@ -220,6 +328,22 @@ fn emit_status(app: &AppHandle, phase: &str, message: Option<&str>) {
         message: message.map(|s| s.to_string()),
     };
     let _ = app.emit(AUTO_STATUS, payload);
+}
+
+fn emit_summary(
+    app: &AppHandle,
+    found_keys: u64,
+    uploaded_dicts: u64,
+    keys_added: u64,
+    keys_uploaded: bool,
+) {
+    let payload = AutoSummaryPayload {
+        found_keys,
+        uploaded_dicts,
+        keys_added,
+        keys_uploaded,
+    };
+    let _ = app.emit(AUTO_SUMMARY, payload);
 }
 
 fn emit_auto_error(app: &AppHandle, code: &str, message: &str) {
