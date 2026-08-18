@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "mfkey_desktop",
+  "productName": "MFKey Desktop",
   "version": "0.1.0",
   "identifier": "com.phntmlab.mfkey_desktop",
   "build": {
@@ -28,6 +28,12 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "category": "Utility",
+    "shortDescription": "Recover MIFARE Classic keys from Flipper Zero logs.",
+    "longDescription": "MFKey Desktop recovers MIFARE Classic (Crypto-1) keys from Flipper Zero nonce logs. It supports offline log files and a live Auto mode that communicates with a Flipper Zero over USB or BLE.",
+    "publisher": "PhantomLab",
+    "copyright": "Copyright © 2026 Lemn4t. Licensed under GPL-3.0-only.",
+    "licenseFile": "../LICENSE",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

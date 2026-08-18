@@ -12,8 +12,9 @@ repository = "https://github.com/phntm-lab/mfkey_desktop"
 [package]
 name = "mfkey_desktop"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Recover MIFARE Classic keys from Flipper Zero nonce logs."
+authors = ["Lemn4t"]
+license = "GPL-3.0-only"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
