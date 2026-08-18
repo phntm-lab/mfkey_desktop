@@ -124,7 +124,9 @@ fn run_auto_inner(
     let (keys_added, keys_uploaded) =
         merge_and_upload_keys(app, &mut sess, &all_keys, logs_dir)?;
 
-    let _ = &logs.remote;
+    if request.delete_logs_after && !all_keys.is_empty() {
+        delete_remote_logs(&mut sess, &logs.remote);
+    }
 
     emit_summary(
         app,
@@ -258,6 +260,12 @@ fn merge_and_upload_keys(
     .map_err(|e| format!("upload {remote_out}: {e}"))?;
 
     Ok((added as u64, true))
+}
+
+fn delete_remote_logs(sess: &mut FlipperSession, remote_logs: &[String]) {
+    for remote in remote_logs {
+        let _ = sess.storage_delete(remote, false);
+    }
 }
 
 fn transfer_percent(sent: usize, total: usize) -> f32 {
