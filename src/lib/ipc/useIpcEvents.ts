@@ -53,6 +53,8 @@ export function useIpcEvents(): void {
   const setAutoPhase = useAutoStore((s) => s.setPhase);
   const setAutoTransfer = useAutoStore((s) => s.setTransfer);
   const setAutoSummary = useAutoStore((s) => s.setSummary);
+  const setAutoAttackProgress = useAutoStore((s) => s.setAttackProgress);
+  const addAutoFoundKey = useAutoStore((s) => s.addFoundKey);
   const setAutoCancelRequested = useAutoStore((s) => s.setCancelRequested);
   const setAutoError = useAutoStore((s) => s.setError);
   const markAutoFinished = useAutoStore((s) => s.markFinished);
@@ -70,8 +72,17 @@ export function useIpcEvents(): void {
     [setProgress],
   );
 
+  const throttledAutoAttackProgress = useMemo(
+    () => throttle(setAutoAttackProgress, PROGRESS_THROTTLE_MS),
+    [setAutoAttackProgress],
+  );
+
   const handleProgress = useCallback(
     (payload: EventPayloadMap["attack://progress"]) => {
+      if (useAutoStore.getState().running()) {
+        throttledAutoAttackProgress(payload);
+        return;
+      }
       setStage(payload.stage);
       if (
         (payload.stage === "running" || payload.stage === "hardnested") &&
@@ -81,7 +92,26 @@ export function useIpcEvents(): void {
       }
       throttledProgress(payload);
     },
-    [setStage, setStatus, throttledProgress],
+    [setStage, setStatus, throttledProgress, throttledAutoAttackProgress],
+  );
+
+  const handleFoundKey = useCallback(
+    (payload: EventPayloadMap["attack://found-key"]) => {
+      if (useAutoStore.getState().running()) {
+        addAutoFoundKey(payload);
+        return;
+      }
+      addFoundKey(payload);
+    },
+    [addFoundKey, addAutoFoundKey],
+  );
+
+  const handleHardNested = useCallback(
+    (payload: EventPayloadMap["attack://hardnested"]) => {
+      if (useAutoStore.getState().running()) return;
+      addHardNestedLine(payload.line);
+    },
+    [addHardNestedLine],
   );
 
   const handleSummary = useCallback(
@@ -100,6 +130,7 @@ export function useIpcEvents(): void {
 
   const handleError = useCallback(
     (payload: EventPayloadMap["attack://error"]) => {
+      if (useAutoStore.getState().running()) return;
       setAttackError(payload.message);
       setStatus("error");
       setCancelRequested(false);
@@ -158,10 +189,8 @@ export function useIpcEvents(): void {
   );
 
   useTauriEvent("attack://progress", handleProgress);
-  useTauriEvent("attack://found-key", addFoundKey);
-  useTauriEvent("attack://hardnested", (payload) =>
-    addHardNestedLine(payload.line),
-  );
+  useTauriEvent("attack://found-key", handleFoundKey);
+  useTauriEvent("attack://hardnested", handleHardNested);
   useTauriEvent("attack://summary", handleSummary);
   useTauriEvent("attack://error", handleError);
   useTauriEvent("device://status", handleDeviceStatus);

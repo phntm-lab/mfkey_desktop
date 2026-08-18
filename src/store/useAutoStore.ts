@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AttackProgress, FoundKey } from "./useAttackStore";
 
 export type AutoPhase =
   | "idle"
@@ -37,6 +38,8 @@ interface AutoState {
   phase: AutoPhase;
   message: string | null;
   transfer: AutoTransfer | null;
+  attackProgress: AttackProgress | null;
+  foundKeys: FoundKey[];
   summary: AutoSummary | null;
   cancelRequested: boolean;
   error: string | null;
@@ -45,6 +48,8 @@ interface AutoState {
   running: () => boolean;
   setPhase: (phase: AutoPhase, message?: string | null) => void;
   setTransfer: (transfer: AutoTransfer | null) => void;
+  setAttackProgress: (progress: AttackProgress | null) => void;
+  addFoundKey: (key: FoundKey) => void;
   setSummary: (summary: AutoSummary | null) => void;
   setCancelRequested: (requested: boolean) => void;
   setError: (error: string | null) => void;
@@ -57,6 +62,8 @@ const initialState = {
   phase: "idle" as AutoPhase,
   message: null,
   transfer: null,
+  attackProgress: null,
+  foundKeys: [] as FoundKey[],
   summary: null,
   cancelRequested: false,
   error: null,
@@ -73,6 +80,9 @@ export const useAutoStore = create<AutoState>((set, get) => ({
   running: () => isAutoActive(get().phase),
   setPhase: (phase, message = null) => set({ phase, message }),
   setTransfer: (transfer) => set({ transfer }),
+  setAttackProgress: (attackProgress) => set({ attackProgress }),
+  addFoundKey: (key) =>
+    set((state) => ({ foundKeys: [...state.foundKeys, key] })),
   setSummary: (summary) => set({ summary }),
   setCancelRequested: (cancelRequested) => set({ cancelRequested }),
   setError: (error) => set({ error }),
