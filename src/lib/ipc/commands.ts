@@ -16,6 +16,7 @@ export interface FileAttackRequest {
 export interface AutoRequest {
   transport: TransportKind;
   deviceId: string;
+  deleteLogsAfter: boolean;
 }
 
 export interface ConnectRequest {
@@ -37,6 +38,7 @@ export const COMMANDS = {
   scanBle: "scan_ble",
   connectFlipper: "connect_flipper",
   startAuto: "start_auto",
+  cancelAuto: "cancel_auto",
 } as const;
 
 export function startFileAttack(request: FileAttackRequest): Promise<void> {
@@ -71,4 +73,8 @@ export function connectFlipper(request: ConnectRequest): Promise<void> {
 
 export function startAuto(request: AutoRequest): Promise<void> {
   return invoke(COMMANDS.startAuto, { request });
+}
+
+export function cancelAuto(): Promise<void> {
+  return invoke(COMMANDS.cancelAuto);
 }

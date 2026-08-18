@@ -8,6 +8,7 @@ import {
 } from "./events";
 import { useAttackStore } from "../../store/useAttackStore";
 import { useConnectionStore } from "../../store/useConnectionStore";
+import { useAutoStore } from "../../store/useAutoStore";
 
 const PROGRESS_THROTTLE_MS = 100;
 
@@ -49,6 +50,11 @@ export function useIpcEvents(): void {
   const markFinished = useAttackStore((s) => s.markFinished);
   const setConnectionStatus = useConnectionStore((s) => s.setStatus);
   const setConnectionError = useConnectionStore((s) => s.setError);
+  const setAutoPhase = useAutoStore((s) => s.setPhase);
+  const setAutoTransfer = useAutoStore((s) => s.setTransfer);
+  const setAutoCancelRequested = useAutoStore((s) => s.setCancelRequested);
+  const setAutoError = useAutoStore((s) => s.setError);
+  const markAutoFinished = useAutoStore((s) => s.markFinished);
 
   const handleDeviceStatus = useCallback(
     (payload: EventPayloadMap["device://status"]) => {
@@ -101,6 +107,43 @@ export function useIpcEvents(): void {
     [setAttackError, setStatus, setCancelRequested, markFinished],
   );
 
+  const handleAutoStatus = useCallback(
+    (payload: EventPayloadMap["auto://status"]) => {
+      setAutoPhase(payload.phase, payload.message ?? null);
+      if (
+        payload.phase === "done" ||
+        payload.phase === "cancelled" ||
+        payload.phase === "error"
+      ) {
+        setAutoCancelRequested(false);
+        markAutoFinished(Date.now());
+      }
+    },
+    [setAutoPhase, setAutoCancelRequested, markAutoFinished],
+  );
+
+  const handleAutoError = useCallback(
+    (payload: EventPayloadMap["auto://error"]) => {
+      setAutoError(payload.message);
+      setAutoPhase("error");
+      setAutoCancelRequested(false);
+      markAutoFinished(Date.now());
+    },
+    [setAutoError, setAutoPhase, setAutoCancelRequested, markAutoFinished],
+  );
+
+  const handleTransfer = useCallback(
+    (payload: EventPayloadMap["transfer://progress"]) => {
+      setAutoTransfer({
+        path: payload.path,
+        transferred: payload.transferred,
+        total: payload.total,
+        percent: payload.percent,
+      });
+    },
+    [setAutoTransfer],
+  );
+
   useTauriEvent("attack://progress", handleProgress);
   useTauriEvent("attack://found-key", addFoundKey);
   useTauriEvent("attack://hardnested", (payload) =>
@@ -109,4 +152,7 @@ export function useIpcEvents(): void {
   useTauriEvent("attack://summary", handleSummary);
   useTauriEvent("attack://error", handleError);
   useTauriEvent("device://status", handleDeviceStatus);
+  useTauriEvent("auto://status", handleAutoStatus);
+  useTauriEvent("auto://error", handleAutoError);
+  useTauriEvent("transfer://progress", handleTransfer);
 }

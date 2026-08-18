@@ -9,6 +9,7 @@ import type {
   ConnectionStatus,
   TransportKind,
 } from "../../store/useConnectionStore";
+import type { AutoPhase } from "../../store/useAutoStore";
 import type { CommandError } from "./commands";
 
 export type AttackCompletionStatus = "success" | "cancelled";
@@ -38,6 +39,16 @@ export interface TransferProgressPayload {
   percent: number;
 }
 
+export interface AutoStatusPayload {
+  phase: AutoPhase;
+  message?: string;
+}
+
+export interface AutoErrorPayload {
+  code: string;
+  message: string;
+}
+
 export interface EventPayloadMap {
   "attack://progress": AttackProgress;
   "attack://found-key": FoundKey;
@@ -46,6 +57,8 @@ export interface EventPayloadMap {
   "attack://error": CommandError;
   "device://status": DeviceStatusPayload;
   "transfer://progress": TransferProgressPayload;
+  "auto://status": AutoStatusPayload;
+  "auto://error": AutoErrorPayload;
 }
 
 export type EventName = keyof EventPayloadMap;
@@ -58,6 +71,8 @@ export const EVENTS = {
   attackError: "attack://error",
   deviceStatus: "device://status",
   transferProgress: "transfer://progress",
+  autoStatus: "auto://status",
+  autoError: "auto://error",
 } as const;
 
 export function onTauriEvent<K extends EventName>(

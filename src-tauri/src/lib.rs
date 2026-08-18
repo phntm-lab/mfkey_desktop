@@ -7,6 +7,7 @@ mod reporter;
 pub fn run() {
     tauri::Builder::default()
         .manage(commands::AttackControl::default())
+        .manage(commands::AutoControl::default())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
@@ -19,6 +20,7 @@ pub fn run() {
             commands::scan_ble,
             commands::connect_flipper,
             commands::start_auto,
+            commands::cancel_auto,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

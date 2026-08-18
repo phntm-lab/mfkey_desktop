@@ -25,6 +25,12 @@ pub struct AttackControl {
     running: Arc<AtomicBool>,
 }
 
+#[derive(Default)]
+pub struct AutoControl {
+    cancel: Arc<AtomicBool>,
+    running: Arc<AtomicBool>,
+}
+
 struct RunningGuard(Arc<AtomicBool>);
 
 impl Drop for RunningGuard {
@@ -51,6 +57,7 @@ pub struct FileAttackRequest {
 pub struct AutoRequest {
     pub transport: TransportKind,
     pub device_id: String,
+    pub delete_logs_after: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -329,4 +336,10 @@ fn emit_device_status(
 pub fn start_auto(request: AutoRequest) -> Result<(), CommandError> {
     let _ = request;
     Err(CommandError::not_implemented("start_auto"))
+}
+
+#[tauri::command]
+pub fn cancel_auto(state: State<AutoControl>) -> Result<(), CommandError> {
+    state.cancel.store(true, Ordering::SeqCst);
+    Ok(())
 }

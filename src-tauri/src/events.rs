@@ -11,6 +11,8 @@ pub const ATTACK_HARDNESTED: &str = "attack://hardnested";
 pub const ATTACK_ERROR: &str = "attack://error";
 pub const DEVICE_STATUS: &str = "device://status";
 pub const TRANSFER_PROGRESS: &str = "transfer://progress";
+pub const AUTO_STATUS: &str = "auto://status";
+pub const AUTO_ERROR: &str = "auto://error";
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -75,4 +77,18 @@ pub struct TransferProgressPayload {
     pub transferred: u64,
     pub total: u64,
     pub percent: f32,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AutoStatusPayload {
+    pub phase: String,
+    pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AutoErrorPayload {
+    pub code: String,
+    pub message: String,
 }
