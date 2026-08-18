@@ -395,3 +395,27 @@ fn emit_transfer(app: &AppHandle, path: &str, transferred: u64, total: u64, perc
     };
     let _ = app.emit(TRANSFER_PROGRESS, payload);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn recognizes_target_log_extensions() {
+        assert!(is_target_log("capture.mfkey32.log"));
+        assert!(is_target_log("Session.NESTED.log"));
+        assert!(!is_target_log("notes.txt"));
+        assert!(!is_target_log("capture.log"));
+    }
+
+    #[test]
+    fn transfer_percent_handles_zero_total() {
+        assert_eq!(transfer_percent(0, 0), 100.0);
+    }
+
+    #[test]
+    fn transfer_percent_scales_linearly() {
+        assert_eq!(transfer_percent(1, 4), 25.0);
+        assert_eq!(transfer_percent(4, 4), 100.0);
+    }
+}

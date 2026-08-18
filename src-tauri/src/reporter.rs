@@ -166,3 +166,40 @@ impl Reporter for TauriReporter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_uid_and_key_type_from_label() {
+        let (uid, key_type) = parse_hardnested_label("UID 01020304 key A");
+        assert_eq!(uid.as_deref(), Some("01020304"));
+        assert_eq!(key_type.as_deref(), Some("A"));
+    }
+
+    #[test]
+    fn missing_markers_yield_none() {
+        let (uid, key_type) = parse_hardnested_label("recovered something");
+        assert!(uid.is_none());
+        assert!(key_type.is_none());
+    }
+
+    #[test]
+    fn trailing_marker_without_value_is_none() {
+        let (uid, key_type) = parse_hardnested_label("UID");
+        assert!(uid.is_none());
+        assert!(key_type.is_none());
+    }
+
+    #[test]
+    fn compute_percent_zero_total_is_zero() {
+        assert_eq!(compute_percent(0, 0, 0.0), 0.0);
+    }
+
+    #[test]
+    fn compute_percent_includes_stage_progress() {
+        assert_eq!(compute_percent(1, 4, 0.0), 25.0);
+        assert_eq!(compute_percent(1, 4, 1.0), 50.0);
+    }
+}
