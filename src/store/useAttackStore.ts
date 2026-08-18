@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AppError } from "../lib/errors";
 
 export type AttackStatus =
   | "idle"
@@ -49,7 +50,7 @@ interface AttackState {
   candidateKeys: number;
   summaryFoundCount: number;
   cancelRequested: boolean;
-  error: string | null;
+  error: AppError | null;
   inputPath: string | null;
   startedAt: number | null;
   finishedAt: number | null;
@@ -61,7 +62,7 @@ interface AttackState {
   addHardNestedLine: (line: string) => void;
   applySummary: (summary: AttackSummary) => void;
   setCancelRequested: (requested: boolean) => void;
-  setError: (error: string | null) => void;
+  setError: (error: AppError | null) => void;
   setInputPath: (path: string | null) => void;
   markStarted: (at: number) => void;
   markFinished: (at: number) => void;

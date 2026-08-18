@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AppError } from "../lib/errors";
 import type { AttackProgress, FoundKey } from "./useAttackStore";
 
 export type AutoPhase =
@@ -42,7 +43,7 @@ interface AutoState {
   foundKeys: FoundKey[];
   summary: AutoSummary | null;
   cancelRequested: boolean;
-  error: string | null;
+  error: AppError | null;
   startedAt: number | null;
   finishedAt: number | null;
   running: () => boolean;
@@ -52,7 +53,7 @@ interface AutoState {
   addFoundKey: (key: FoundKey) => void;
   setSummary: (summary: AutoSummary | null) => void;
   setCancelRequested: (requested: boolean) => void;
-  setError: (error: string | null) => void;
+  setError: (error: AppError | null) => void;
   markStarted: (at: number) => void;
   markFinished: (at: number) => void;
   reset: () => void;

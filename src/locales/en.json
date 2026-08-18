@@ -126,5 +126,24 @@
     "title": "Disclaimer",
     "body": "This tool is intended exclusively for security research, education, and testing on cards you own or have explicit permission to analyze. The author is not responsible for any misuse. Use at your own risk and in accordance with the laws of your jurisdiction.",
     "accept": "I accept"
+  },
+  "errors": {
+    "already_running": "An operation is already running. Wait for it to finish or cancel it.",
+    "io": "A file system error occurred.",
+    "parse": "The log file could not be read or is malformed.",
+    "no_usable_nonces": "No usable nonces were found in the selected file.",
+    "no_logs": "No logs were found on the device.",
+    "internal": "An internal error occurred.",
+    "cancelled": "The operation was cancelled.",
+    "timeout": "The operation timed out. Check the connection and try again.",
+    "protocol": "Unexpected response from the Flipper. Try reconnecting.",
+    "device": "A device error occurred.",
+    "device_unreachable": "The Flipper could not be reached. Check the connection and try again.",
+    "device_disconnected": "The Flipper was disconnected.",
+    "bluetooth_off": "Bluetooth appears to be off. Turn Bluetooth on and try again.",
+    "not_paired": "The Flipper is not paired. Pair it in your system Bluetooth settings first.",
+    "no_adapter": "No Bluetooth adapter was found on this system.",
+    "access_denied": "Bluetooth access was denied. Check this app's permissions in the system settings.",
+    "unknown": "An unexpected error occurred."
   }
 }

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { AppError } from "../lib/errors";
 
 export type TransportKind = "usb" | "ble";
 
@@ -22,12 +23,12 @@ interface ConnectionState {
   transport: TransportKind;
   device: FlipperDevice | null;
   availableDevices: FlipperDevice[];
-  error: string | null;
+  error: AppError | null;
   setStatus: (status: ConnectionStatus) => void;
   setTransport: (transport: TransportKind) => void;
   setDevice: (device: FlipperDevice | null) => void;
   setAvailableDevices: (devices: FlipperDevice[]) => void;
-  setError: (error: string | null) => void;
+  setError: (error: AppError | null) => void;
   reset: () => void;
 }
 

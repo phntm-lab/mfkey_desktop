@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { CommandError } from "./ipc/commands";
 
 export type AppErrorSource = "command" | "event" | "render" | "unknown";
@@ -48,4 +49,19 @@ export function toAppError(
     message: "An unexpected error occurred",
     cause: value,
   };
+}
+
+export interface DisplayError {
+  message: string;
+  detail: string | null;
+}
+
+export function localizeError(t: TFunction, error: AppError): DisplayError {
+  const localized = t(`errors.${error.code}`, { defaultValue: "" });
+  if (localized) {
+    const detail =
+      error.message && error.message !== localized ? error.message : null;
+    return { message: localized, detail };
+  }
+  return { message: error.message || t("errors.unknown"), detail: null };
 }

@@ -25,7 +25,7 @@ import {
   saveRecoveredKeys,
   startFileAttack,
 } from "../lib/ipc/commands";
-import { toAppError } from "../lib/errors";
+import { localizeError, toAppError } from "../lib/errors";
 
 interface ExportInfo {
   tone: "success" | "danger";
@@ -122,7 +122,7 @@ export function AttackScreen() {
       const path = await pickInputFile();
       if (path) setInputPath(path);
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
     }
   }, [setInputPath, setError]);
 
@@ -135,7 +135,7 @@ export function AttackScreen() {
     try {
       await startFileAttack({ path: inputPath });
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
       setStatus("error");
       markFinished(Date.now());
     }
@@ -146,7 +146,7 @@ export function AttackScreen() {
     try {
       await cancelAttack();
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
     }
   }, [setCancelRequested, setError]);
 
@@ -165,9 +165,14 @@ export function AttackScreen() {
           : null,
       );
     } catch (e) {
-      setExportInfo({ tone: "danger", text: toAppError(e, "command").message });
+      setExportInfo({
+        tone: "danger",
+        text: localizeError(t, toAppError(e, "command")).message,
+      });
     }
   }, [foundKeys, dictOutputs, t]);
+
+  const displayError = error ? localizeError(t, error) : null;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -256,11 +261,18 @@ export function AttackScreen() {
         </Panel>
       )}
 
-      {status === "error" && error && (
+      {status === "error" && displayError && (
         <Panel title={t("screens.attack.errorTitle")}>
           <div className="flex items-start gap-3 text-sm text-danger">
             <AlertTriangle size={18} strokeWidth={1.75} className="shrink-0" />
-            <p className="min-w-0 break-words">{error}</p>
+            <div className="flex min-w-0 flex-col gap-1">
+              <p className="break-words">{displayError.message}</p>
+              {displayError.detail && (
+                <p className="break-words font-mono text-xs text-muted">
+                  {displayError.detail}
+                </p>
+              )}
+            </div>
           </div>
         </Panel>
       )}

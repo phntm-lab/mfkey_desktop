@@ -19,7 +19,7 @@ import {
   type AutoPhase,
 } from "../store/useAutoStore";
 import { cancelAuto, startAuto } from "../lib/ipc/commands";
-import { toAppError } from "../lib/errors";
+import { localizeError, toAppError } from "../lib/errors";
 
 const PHASE_TONE: Record<AutoPhase, StatusTone> = {
   idle: "neutral",
@@ -103,7 +103,7 @@ export function AutoScreen() {
         deleteLogsAfter,
       });
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
       setPhase("error");
       markFinished(Date.now());
     }
@@ -114,9 +114,11 @@ export function AutoScreen() {
     try {
       await cancelAuto();
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
     }
   }, [setCancelRequested, setError]);
+
+  const displayError = error ? localizeError(t, error) : null;
 
   const progressIndeterminate =
     phase === "connecting" ||
@@ -235,11 +237,18 @@ export function AutoScreen() {
         </Panel>
       )}
 
-      {phase === "error" && error && (
+      {phase === "error" && displayError && (
         <Panel title={t("screens.auto.errorTitle")}>
           <div className="flex items-start gap-3 text-sm text-danger">
             <AlertTriangle size={18} strokeWidth={1.75} className="shrink-0" />
-            <p className="min-w-0 break-words">{error}</p>
+            <div className="flex min-w-0 flex-col gap-1">
+              <p className="break-words">{displayError.message}</p>
+              {displayError.detail && (
+                <p className="break-words font-mono text-xs text-muted">
+                  {displayError.detail}
+                </p>
+              )}
+            </div>
           </div>
         </Panel>
       )}

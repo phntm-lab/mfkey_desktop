@@ -9,6 +9,7 @@ import {
 import { useAttackStore } from "../../store/useAttackStore";
 import { useConnectionStore } from "../../store/useConnectionStore";
 import { useAutoStore } from "../../store/useAutoStore";
+import { toAppError } from "../errors";
 
 const PROGRESS_THROTTLE_MS = 100;
 
@@ -62,7 +63,14 @@ export function useIpcEvents(): void {
   const handleDeviceStatus = useCallback(
     (payload: EventPayloadMap["device://status"]) => {
       setConnectionStatus(payload.status);
-      setConnectionError(payload.status === "error" ? (payload.message ?? null) : null);
+      setConnectionError(
+        payload.status === "error"
+          ? toAppError(
+              { code: payload.code ?? "device", message: payload.message ?? "" },
+              "event",
+            )
+          : null,
+      );
     },
     [setConnectionStatus, setConnectionError],
   );
@@ -131,7 +139,7 @@ export function useIpcEvents(): void {
   const handleError = useCallback(
     (payload: EventPayloadMap["attack://error"]) => {
       if (useAutoStore.getState().running()) return;
-      setAttackError(payload.message);
+      setAttackError(toAppError(payload, "event"));
       setStatus("error");
       setCancelRequested(false);
       markFinished(Date.now());
@@ -168,7 +176,7 @@ export function useIpcEvents(): void {
 
   const handleAutoError = useCallback(
     (payload: EventPayloadMap["auto://error"]) => {
-      setAutoError(payload.message);
+      setAutoError(toAppError(payload, "event"));
       setAutoPhase("error");
       setAutoCancelRequested(false);
       markAutoFinished(Date.now());

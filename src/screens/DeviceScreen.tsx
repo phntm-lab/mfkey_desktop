@@ -16,7 +16,7 @@ import {
   type TransportKind,
 } from "../store/useConnectionStore";
 import { connectFlipper, listFlipperUsb, scanBle } from "../lib/ipc/commands";
-import { toAppError } from "../lib/errors";
+import { localizeError, toAppError } from "../lib/errors";
 
 const STATUS_TONE: Record<ConnectionStatus, StatusTone> = {
   disconnected: "neutral",
@@ -67,7 +67,7 @@ export function DeviceScreen() {
       setAvailableDevices(devices);
       setStatus("disconnected");
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
       setStatus("error");
     }
   }, [transport, setError, setDevice, setStatus, setAvailableDevices]);
@@ -85,10 +85,12 @@ export function DeviceScreen() {
     try {
       await connectFlipper({ transport, deviceId: device.id });
     } catch (e) {
-      setError(toAppError(e, "command").message);
+      setError(toAppError(e, "command"));
       setStatus("error");
     }
   }, [device, transport, setError, setStatus]);
+
+  const displayError = error ? localizeError(t, error) : null;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -153,11 +155,18 @@ export function DeviceScreen() {
         </div>
       </Panel>
 
-      {status === "error" && error && (
+      {status === "error" && displayError && (
         <Panel title={t("screens.device.errorTitle")}>
           <div className="flex items-start gap-3 text-sm text-danger">
             <AlertTriangle size={18} strokeWidth={1.75} className="shrink-0" />
-            <p className="min-w-0 break-words">{error}</p>
+            <div className="flex min-w-0 flex-col gap-1">
+              <p className="break-words">{displayError.message}</p>
+              {displayError.detail && (
+                <p className="break-words font-mono text-xs text-muted">
+                  {displayError.detail}
+                </p>
+              )}
+            </div>
           </div>
         </Panel>
       )}
