@@ -57,17 +57,11 @@ pub struct HardNestedPayload {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AttackErrorPayload {
-    pub code: String,
-    pub message: String,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct DeviceStatusPayload {
     pub status: String,
     pub device_id: Option<String>,
     pub transport: Option<TransportKind>,
+    pub code: Option<String>,
     pub message: Option<String>,
 }
 
@@ -94,11 +88,4 @@ pub struct AutoSummaryPayload {
     pub uploaded_dicts: u64,
     pub keys_added: u64,
     pub keys_uploaded: bool,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AutoErrorPayload {
-    pub code: String,
-    pub message: String,
 }

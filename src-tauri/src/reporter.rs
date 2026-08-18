@@ -8,9 +8,10 @@ use tauri::{AppHandle, Emitter};
 use mfkey_core::core::model::MfClassicKey;
 use mfkey_core::core::reporter::Reporter;
 
+use crate::error::CommandError;
 use crate::events::{
-    ATTACK_ERROR, ATTACK_FOUND_KEY, ATTACK_HARDNESTED, ATTACK_PROGRESS, AttackErrorPayload,
-    AttackProgressPayload, FoundKeyPayload, HardNestedPayload,
+    ATTACK_ERROR, ATTACK_FOUND_KEY, ATTACK_HARDNESTED, ATTACK_PROGRESS, AttackProgressPayload,
+    FoundKeyPayload, HardNestedPayload,
 };
 
 const PROGRESS_THROTTLE: Duration = Duration::from_millis(40);
@@ -103,11 +104,7 @@ impl Reporter for TauriReporter {
     }
 
     fn error(&self, msg: &str) {
-        let payload = AttackErrorPayload {
-            code: "internal".to_string(),
-            message: msg.to_string(),
-        };
-        let _ = self.app.emit(ATTACK_ERROR, payload);
+        let _ = self.app.emit(ATTACK_ERROR, CommandError::internal(msg));
     }
 
     fn begin_progress(&self, total_nonces: usize) {

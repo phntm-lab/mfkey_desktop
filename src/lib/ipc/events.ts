@@ -29,6 +29,7 @@ export interface DeviceStatusPayload {
   status: ConnectionStatus;
   deviceId?: string;
   transport?: TransportKind;
+  code?: string;
   message?: string;
 }
 
@@ -51,11 +52,6 @@ export interface AutoSummaryPayload {
   keysUploaded: boolean;
 }
 
-export interface AutoErrorPayload {
-  code: string;
-  message: string;
-}
-
 export interface EventPayloadMap {
   "attack://progress": AttackProgress;
   "attack://found-key": FoundKey;
@@ -66,7 +62,7 @@ export interface EventPayloadMap {
   "transfer://progress": TransferProgressPayload;
   "auto://status": AutoStatusPayload;
   "auto://summary": AutoSummaryPayload;
-  "auto://error": AutoErrorPayload;
+  "auto://error": CommandError;
 }
 
 export type EventName = keyof EventPayloadMap;

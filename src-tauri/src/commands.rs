@@ -12,10 +12,10 @@ use tauri_plugin_dialog::DialogExt;
 use mfkey_core::core::attack_runner::{self, FileAttackOutcome};
 use mfkey_core::core::reporter::Reporter;
 
-use crate::error::CommandError;
+use crate::error::{CommandError, codes};
 use crate::events::{
-    ATTACK_ERROR, ATTACK_SUMMARY, AttackErrorPayload, AttackSummaryPayload, DEVICE_STATUS,
-    DeviceStatusPayload, DictOutputPayload,
+    ATTACK_ERROR, ATTACK_SUMMARY, AttackSummaryPayload, DEVICE_STATUS, DeviceStatusPayload,
+    DictOutputPayload,
 };
 use crate::reporter::TauriReporter;
 
@@ -141,12 +141,17 @@ pub fn start_file_attack(
             Ok(FileAttackOutcome::NoUsableNonces) => {
                 emit_error(
                     &app,
-                    "no_usable_nonces",
-                    "No usable nonces found in the selected file",
+                    &CommandError::new(
+                        codes::NO_USABLE_NONCES,
+                        "No usable nonces found in the selected file",
+                    ),
                 );
             }
             Err(e) => {
-                emit_error(&app, "io", &format!("Failed to process file: {e}"));
+                emit_error(
+                    &app,
+                    &CommandError::io(&format!("Failed to process file: {e}")),
+                );
             }
         }
     });
@@ -195,12 +200,8 @@ fn clean_stale_dict_dirs(base: &Path) {
     }
 }
 
-fn emit_error(app: &AppHandle, code: &str, message: &str) {
-    let payload = AttackErrorPayload {
-        code: code.to_string(),
-        message: message.to_string(),
-    };
-    let _ = app.emit(ATTACK_ERROR, payload);
+fn emit_error(app: &AppHandle, error: &CommandError) {
+    let _ = app.emit(ATTACK_ERROR, error);
 }
 
 #[tauri::command]
@@ -254,7 +255,7 @@ pub fn pick_input_file(app: AppHandle) -> Result<Option<String>, CommandError> {
 #[tauri::command]
 pub fn list_flipper_usb() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
     let ports = mfkey_flipper::find::find_all_flippers()
-        .map_err(|e| CommandError::device(&format!("Failed to enumerate USB ports: {e}")))?;
+        .map_err(|e| CommandError::flipper("Failed to enumerate USB ports", &e))?;
     Ok(ports
         .into_iter()
         .map(|p| FlipperDeviceInfo {
@@ -268,7 +269,7 @@ pub fn list_flipper_usb() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
 #[tauri::command]
 pub fn scan_ble() -> Result<Vec<FlipperDeviceInfo>, CommandError> {
     let devices = mfkey_flipper::ble::scanner::list_ble_devices_blocking()
-        .map_err(|e| CommandError::device(&format!("BLE scan failed: {e}")))?;
+        .map_err(|e| CommandError::flipper("BLE scan failed", &e))?;
     Ok(devices
         .into_iter()
         .map(|d| FlipperDeviceInfo {
@@ -286,7 +287,13 @@ pub fn connect_flipper(app: AppHandle, request: ConnectRequest) -> Result<(), Co
         device_id,
     } = request;
 
-    emit_device_status(&app, "connecting", Some(&device_id), Some(transport), None);
+    emit_device_status(
+        &app,
+        "connecting",
+        Some(&device_id),
+        Some(transport),
+        None,
+    );
 
     std::thread::spawn(move || match probe_device(transport, &device_id) {
         Ok(()) => emit_device_status(&app, "connected", Some(&device_id), Some(transport), None),
@@ -295,7 +302,7 @@ pub fn connect_flipper(app: AppHandle, request: ConnectRequest) -> Result<(), Co
             "error",
             Some(&device_id),
             Some(transport),
-            Some(&e.to_string()),
+            Some(CommandError::from(e)),
         ),
     });
 
@@ -321,13 +328,18 @@ fn emit_device_status(
     status: &str,
     device_id: Option<&str>,
     transport: Option<TransportKind>,
-    message: Option<&str>,
+    error: Option<CommandError>,
 ) {
+    let (code, message) = match error {
+        Some(err) => (Some(err.code), Some(err.message)),
+        None => (None, None),
+    };
     let payload = DeviceStatusPayload {
         status: status.to_string(),
         device_id: device_id.map(|s| s.to_string()),
         transport,
-        message: message.map(|s| s.to_string()),
+        code,
+        message,
     };
     let _ = app.emit(DEVICE_STATUS, payload);
 }

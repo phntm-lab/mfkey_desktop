@@ -16,8 +16,8 @@ use mfkey_flipper::FlipperSession;
 use crate::commands::{AutoRequest, TransportKind};
 use crate::error::CommandError;
 use crate::events::{
-    AUTO_ERROR, AUTO_STATUS, AUTO_SUMMARY, AutoErrorPayload, AutoStatusPayload, AutoSummaryPayload,
-    TRANSFER_PROGRESS, TransferProgressPayload,
+    AUTO_ERROR, AUTO_STATUS, AUTO_SUMMARY, AutoStatusPayload, AutoSummaryPayload, TRANSFER_PROGRESS,
+    TransferProgressPayload,
 };
 use crate::reporter::TauriReporter;
 
@@ -78,8 +78,8 @@ fn clean_stale_auto_dirs(base: &Path) {
 }
 
 pub fn run_auto(app: AppHandle, cancel: Arc<AtomicBool>, request: AutoRequest, logs_dir: PathBuf) {
-    if let Err(message) = run_auto_inner(&app, &cancel, &request, &logs_dir) {
-        emit_auto_error(&app, "auto", &message);
+    if let Err(error) = run_auto_inner(&app, &cancel, &request, &logs_dir) {
+        emit_auto_error(&app, &error);
     }
 }
 
@@ -88,10 +88,10 @@ fn run_auto_inner(
     cancel: &Arc<AtomicBool>,
     request: &AutoRequest,
     logs_dir: &Path,
-) -> Result<(), String> {
+) -> Result<(), CommandError> {
     emit_status(app, PHASE_CONNECTING, None);
-    let mut sess =
-        open_session(request.transport, &request.device_id).map_err(|e| e.to_string())?;
+    let mut sess = open_session(request.transport, &request.device_id)
+        .map_err(|e| CommandError::flipper("connect to Flipper", &e))?;
 
     if cancel.load(Ordering::SeqCst) {
         emit_status(app, PHASE_CANCELLED, None);
@@ -220,7 +220,7 @@ fn merge_and_upload_keys(
     sess: &mut FlipperSession,
     all_keys: &BTreeSet<String>,
     logs_dir: &Path,
-) -> Result<(u64, bool), String> {
+) -> Result<(u64, bool), CommandError> {
     if all_keys.is_empty() {
         return Ok((0, false));
     }
@@ -229,7 +229,7 @@ fn merge_and_upload_keys(
     let mut local_body = all_keys.iter().cloned().collect::<Vec<_>>().join("\n");
     local_body.push('\n');
     std::fs::write(&result_path, local_body.as_bytes())
-        .map_err(|e| format!("write {result_path:?}: {e}"))?;
+        .map_err(|e| CommandError::io(&format!("write {result_path:?}: {e}")))?;
 
     let remote_out = format!("{ASSETS_DIR}/{RESULT_REMOTE_NAME}");
 
@@ -257,7 +257,7 @@ fn merge_and_upload_keys(
             transfer_percent(sent, total),
         );
     })
-    .map_err(|e| format!("upload {remote_out}: {e}"))?;
+    .map_err(|e| CommandError::flipper(&format!("upload {remote_out}"), &e))?;
 
     Ok((added as u64, true))
 }
@@ -291,10 +291,10 @@ fn download_target_logs(
     cancel: &Arc<AtomicBool>,
     sess: &mut FlipperSession,
     logs_dir: &Path,
-) -> Result<DownloadedLogs, String> {
+) -> Result<DownloadedLogs, CommandError> {
     let entries = sess
         .storage_list(NFC_DIR)
-        .map_err(|e| format!("cannot list {NFC_DIR}: {e}"))?;
+        .map_err(|e| CommandError::flipper(&format!("list {NFC_DIR}"), &e))?;
 
     let targets: Vec<String> = entries
         .into_iter()
@@ -314,11 +314,11 @@ fn download_target_logs(
         let remote_path = format!("{NFC_DIR}/{name}");
         let data = sess
             .storage_read(&remote_path)
-            .map_err(|e| format!("read {remote_path}: {e}"))?;
+            .map_err(|e| CommandError::flipper(&format!("read {remote_path}"), &e))?;
 
         let local_path = logs_dir.join(name);
         std::fs::write(&local_path, &data)
-            .map_err(|e| format!("write {local_path:?}: {e}"))?;
+            .map_err(|e| CommandError::io(&format!("write {local_path:?}: {e}")))?;
 
         let len = data.len() as u64;
         emit_transfer(app, &remote_path, len, len, 100.0);
@@ -354,12 +354,8 @@ fn emit_summary(
     let _ = app.emit(AUTO_SUMMARY, payload);
 }
 
-fn emit_auto_error(app: &AppHandle, code: &str, message: &str) {
-    let payload = AutoErrorPayload {
-        code: code.to_string(),
-        message: message.to_string(),
-    };
-    let _ = app.emit(AUTO_ERROR, payload);
+fn emit_auto_error(app: &AppHandle, error: &CommandError) {
+    let _ = app.emit(AUTO_ERROR, error);
 }
 
 fn emit_transfer(app: &AppHandle, path: &str, transferred: u64, total: u64, percent: f32) {
